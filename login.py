@@ -8,25 +8,20 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from socket import *
 import struct
+import pickle
 from time import ctime
-
+from chattingroom import *
+import tcpclisock as tcp
 HOST = '127.0.0.1'
-PORT = 8000
+PORT = 21567
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
-class tcpCliSock(object):
-    def __init__(self):
-        self.client = socket(AF_INET, SOCK_STREAM)
-    def link(self):
-        print("s")
-        self.client.connect(ADDR)
-        print("I")
+
 
 class Ui_MainWindow(object):
     def __init__(self,window):
-        self.link = tcpCliSock()
+        self.link = tcp.tcpCliSock()
         self.window = window
     def setupUi(self):
         self.window.setObjectName("MainWindow")
@@ -105,30 +100,31 @@ class Ui_MainWindow(object):
     def linkfind(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn/find'))
     def log(self):
-        data = "login"
-        if self.username.text() !="" and self.password.text() !="":
-            username = self.username.text()
-            password = self.passowrd.text()
-        elif self.username.text() == "":
+        if self.username.text() == "":
             reply = QMessageBox.warning(self.window, 'Warning', '请输入昵称!', QMessageBox.Yes)
-            print("here!")
         elif self.password.text() == "":
-            print("here!")
             reply = QMessageBox.warning(self.window, "Wanring", "请输入密码！", QMessageBox.Yes)
-        print("here！！")
-        self.link.link()
-        self.link.client.send(bytes(data,encoding = "utf-8"))
-        luser = len(username)
-        lpassword = len(password)
-        givelen =  struct.pack('2i',luser,lpassword)
-        self.link.client.sendall(givelen)
-        givestring = struct.pack(str(luser)+'s'+str(lpassword)+"s",username,password)
-        receive = self.link.client.recv(BUFSIZE)
-        if(receive != "sucess"):#登陆不成功
-            error = QMessageBox.warning(self, "Warning", "用户名不存在或密码不正确!",QMessageBox.Yes)
-            self.link.client.close()
         else:
-            print("sucess!")
+            username = self.username.text()
+            password = self.password.text()
+            self.link.link()
+            command = struct.pack('i',1)
+            data = {'username':username,'password':password}
+            datas = pickle.dumps(data)
+            ldata = len(datas)
+            ldata = struct.pack('i',ldata)
+            packages = command+ldata+datas
+            self.link.send(packages)
+            receive = self.link.receive_command()
+            if(receive != 1):
+                error = QMessageBox.warning(self, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
+                self.link.client.close()
+            else:
+                self.window.close()
+                self.chatwindow = QtWidgets.QDialog()
+                self.chattingroom = Ui_Dialog(self.link,username)
+                self.chattingroom.setupUi(self.chatwindow)
+                self.chatwindow.show()
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -138,9 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    w = QtWidgets.QMainWindow()
-    form = Ui_MainWindow(w)
-    form.setupUi()
+    w =MainWindow()
     w.show()
     sys.exit(app.exec_())
 
