@@ -4,6 +4,7 @@ import sqlite3
 import struct
 import pickle
 from time import ctime
+from queue import *
 BUFFSIZE = 4
 def dict_factory(cursor, row):
     d = {}
@@ -11,9 +12,10 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 #为了让数据库查询的时候返回的是一个list，list里面装的是dict
+
+clientlist = []
+chatting = []
 class MyServer(socketserver.BaseRequestHandler):
-    chatting = []
-    clientlist = []
     def receiveSize(self):
         conn = self.request
         receive = conn.recv(4)
@@ -41,18 +43,20 @@ class MyServer(socketserver.BaseRequestHandler):
             conn.sendall(command)
     #上述都是为了封装好用
     def chat(self):
-         package = getDict()#sender and message
+         package = self.getDict()#sender and message
          package['time'] = ctime()
+         print (package)
          chatting.append(package)
     def handlePoll(self):
         package = self.getDict()
-        if package['num'] == len(MyServer.chatting):
+        print(len(chatting))
+        print('num',package['num'])
+        if package['num'] == len(chatting) or package['num'] == -1:
+            print("here!")
             self.sendPackages(2)#2表示轮询没有新消息
         else:
-            news = MyServer.chatting[package['num']]
-            self.sendPackages(3，news)#3表示轮询得到新消息
-
-
+            news = chatting[package['num']]
+            self.sendPackages(3,news)#3表示轮询得到新消息
     def info(self):
         dicts = self.getDict()
         check = dicts['username']
@@ -61,7 +65,12 @@ class MyServer(socketserver.BaseRequestHandler):
         cursor = dbconn.cursor()
         cursor.execute("SELECT * from users where name= "+"\'"+check+"\'")
         user = cursor.fetchall()[0]
+        if len(chatting) == 0:
+            user['NUM'] = len(chatting)#附带一条现在的聊到哪里了
+        elif len(chatting) != 0:
+            user['NUM'] = len(chatting)-1
         self.sendPackages(1,user)
+
     def login(self):
         conn = self.request
         data = self.getDict()
@@ -73,7 +82,7 @@ class MyServer(socketserver.BaseRequestHandler):
         if user['PASSWORD'] == data['password']:
             returnCommand =struct.pack('i',1)
             conn.send(returnCommand)
-            Myserver.clientlist.append()###这个地方想想咋写
+            clientlist.append(user)###这个地方想想咋写
             return
         returnCommand = struct.pack('i',0)
         conn.send(returnCommand)

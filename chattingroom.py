@@ -11,33 +11,37 @@ import struct
 import pickle
 import tcpclisock as tcp
 from PyQt5.QtWidgets import QMessageBox
+from time import sleep
 class Client(QtCore.QThread):
+    hasNews = QtCore.pyqtSignal(dict)
     def __init__(self,link,username='',age=0,address=''):
-        self.hasNews = Qtcore.pyqtSignal(dict)
         super(Client,self).__init__()
         self.link = link
-        self.username = name
+        self.username = username
         self.age = age
         self.address = address
         self.num = -1;
-        self.hasNews.connect(Ui_Dialog)
     def sendmessage(self,message):
         command = self.link.commandHandle(3)
         dicts = {'sender':self.username,'message':message}
         packages =self.link.packagesHandle(dicts)
         self.link.send(command+packages)
     def run(self):
-        command = self.link.poll(self.num)
-        if command == 2:
-            return
-        elif command == 3:
-            packages = self.link.receive_packages()
-            self.num += 1
-            self.hasNews.emit(packages)
+        while True:
+            sleep(1)
+            command = self.link.poll(self.num)
+            print(self.num)
+            print(command)
+            if command == 3:
+                packages = self.link.receive_packages()
+                self.num += 1
+                self.hasNews.emit(packages)
+            elif command == 0:
+                break
 class Ui_Dialog(object):
     def __init__(self,link,username):
         self.client =Client(link,username)
-        self.client.hasNews.connect(self.messageshow)
+        self.client.start()
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(1319, 830)
@@ -53,17 +57,6 @@ class Ui_Dialog(object):
         self.tabWidget.setObjectName("tabWidget")
         self.Chatting = QtWidgets.QWidget()
         self.Chatting.setObjectName("Chatting")
-        self.mainarea = QtWidgets.QScrollArea(self.Chatting)
-        self.mainarea.setGeometry(QtCore.QRect(10, 10, 941, 471))
-        self.mainarea.setWidgetResizable(True)
-        self.mainarea.setObjectName("mainarea")
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 939, 469))
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.showmessage = QtWidgets.QWidget(self.scrollAreaWidgetContents)
-        self.showmessage.setGeometry(QtCore.QRect(10, 10, 911, 451))
-        self.showmessage.setObjectName("showmessage")
-        self.mainarea.setWidget(self.scrollAreaWidgetContents)
         self.Edit = QtWidgets.QPlainTextEdit(self.Chatting)
         self.Edit.setGeometry(QtCore.QRect(20, 490, 931, 151))
         self.Edit.setObjectName("Edit")
@@ -85,16 +78,12 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
-        self.label_6 = QtWidgets.QLabel(self.Chatting)
-        self.label_6.setGeometry(QtCore.QRect(1010, 140, 81, 30))
+        self.label_5 = QtWidgets.QLabel(self.Chatting)
+        self.label_5.setGeometry(QtCore.QRect(1010, 140, 81, 30))
         font = QtGui.QFont()
         font.setFamily("Helvetica-Condensed-Black-Se")
         font.setPointSize(10)
-        self.label_6.setFont(font)
-        self.label_6.setObjectName("label_6")
-        self.label_5 = QtWidgets.QLabel(self.Chatting)
-        self.label_5.setGeometry(QtCore.QRect(570, 240, 81, 18))
-        self.label_5.setText("")
+        self.label_5.setFont(font)
         self.label_5.setObjectName("label_5")
         self.label_4 = QtWidgets.QLabel(self.Chatting)
         self.label_4.setGeometry(QtCore.QRect(1010, 210, 81, 30))
@@ -103,17 +92,6 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
-        self.scrollArea_2 = QtWidgets.QScrollArea(self.Chatting)
-        self.scrollArea_2.setGeometry(QtCore.QRect(1000, 400, 251, 271))
-        self.scrollArea_2.setWidgetResizable(True)
-        self.scrollArea_2.setObjectName("scrollArea_2")
-        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 249, 269))
-        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
-        self.widget = QtWidgets.QWidget(self.scrollAreaWidgetContents_2)
-        self.widget.setGeometry(QtCore.QRect(10, 10, 211, 251))
-        self.widget.setObjectName("widget")
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
         self.send = QtWidgets.QPushButton(self.Chatting)
         self.send.setGeometry(QtCore.QRect(700, 650, 112, 41))
         self.send.setObjectName("send")
@@ -148,15 +126,22 @@ class Ui_Dialog(object):
         font.setPointSize(10)
         self.address.setFont(font)
         self.address.setText("")
-        self.address.setObjectName("label_8")
+        self.address.setObjectName("address")
         self.verticalLayout.addWidget(self.address)
         self.pushButton_3 = QtWidgets.QPushButton(self.Chatting)
         self.pushButton_3.setGeometry(QtCore.QRect(1080, 293, 112, 41))
         self.pushButton_3.setObjectName("pushButton_3")
+        self.messages = QtWidgets.QTextBrowser(self.Chatting)
+        self.messages.setGeometry(QtCore.QRect(20, 30, 931, 441))
+        self.messages.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.messages.setObjectName("messages")
+        self.users = QtWidgets.QTextBrowser(self.Chatting)
+        self.users.setGeometry(QtCore.QRect(1010, 390, 256, 251))
+        self.users.setObjectName("users")
         self.tabWidget.addTab(self.Chatting, "")
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
-        self.scrollArea = QtWidgets.QScrollArea(self.tab_2)
+        self.Files = QtWidgets.QWidget()
+        self.Files.setObjectName("Files")
+        self.scrollArea = QtWidgets.QScrollArea(self.Files)
         self.scrollArea.setGeometry(QtCore.QRect(10, 16, 741, 481))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
@@ -175,19 +160,18 @@ class Ui_Dialog(object):
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(2, item)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_3)
-        self.tabWidget.addTab(self.tab_2, "")
+        self.tabWidget.addTab(self.Files, "")
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
+        self.close.clicked.connect(Dialog.close)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
-
-
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.label.setText(_translate("Dialog", "Ty\'s Chatting Room"))
         self.label_2.setText(_translate("Dialog", "Your own Information"))
         self.label_3.setText(_translate("Dialog", "name:"))
-        self.label_6.setText(_translate("Dialog", "age:"))
+        self.label_5.setText(_translate("Dialog", "age:"))
         self.label_4.setText(_translate("Dialog", "adrress:"))
         self.send.setText(_translate("Dialog", "send"))
         self.close.setText(_translate("Dialog", "close"))
@@ -197,9 +181,8 @@ class Ui_Dialog(object):
         item.setText(_translate("Dialog", "FileName"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("Dialog", "Size"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Dialog", "Tab 2"))
-
-
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Files), _translate("Dialog", "Files"))
+        self.messages.textChanged.connect(self.movecursor)
         #一下为初始化的一些需要处理的数据
         command = 2
         command = struct.pack('i',command)
@@ -218,10 +201,22 @@ class Ui_Dialog(object):
             self.client.address = dicts['ADDRESS']
             self.client.age = dicts['AGE']
             self.client.num = dicts['NUM']
+            #下为信号定义
+            self.send.clicked.connect(self.sendMessage)
+            self.client.hasNews.connect(self.showMessage)#这个地方的信号定义玄学
         else:
             error = QMessageBox.warning(self, "Warning","你的网络出现问题，无法查询到你的信息！",QMessageBox.Yes)
-    def showmessage(self):
-
+    def sendMessage(self):
+        s = self.Edit.toPlainText()#test ok!
+        self.client.sendmessage(s)
+        self.Edit.setPlainText("")
+    def showMessage(self,dicts):
+        line1 = dicts['sender']+" "+dicts['time']#sender message time
+        line2 = dicts['message']
+        self.messages.append(line1)
+        self.messages.append(line2)
+    def movecursor(self):
+        self.messages.moveCursor(QtGui.QTextCursor.End)
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

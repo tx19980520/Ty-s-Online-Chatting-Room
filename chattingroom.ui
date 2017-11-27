@@ -48,39 +48,6 @@
     <attribute name="title">
      <string>Chatting</string>
     </attribute>
-    <widget class="QScrollArea" name="mainarea">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>941</width>
-       <height>471</height>
-      </rect>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>939</width>
-        <height>469</height>
-       </rect>
-      </property>
-      <widget class="QWidget" name="showmessage" native="true">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>911</width>
-         <height>451</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-    </widget>
     <widget class="QPlainTextEdit" name="Edit">
      <property name="geometry">
       <rect>
@@ -141,7 +108,7 @@
       <string>name:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
        <x>1010</x>
@@ -158,19 +125,6 @@
      </property>
      <property name="text">
       <string>age:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>570</x>
-       <y>240</y>
-       <width>81</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
     <widget class="QLabel" name="label_4">
@@ -191,39 +145,6 @@
      <property name="text">
       <string>adrress:</string>
      </property>
-    </widget>
-    <widget class="QScrollArea" name="scrollArea_2">
-     <property name="geometry">
-      <rect>
-       <x>1000</x>
-       <y>400</y>
-       <width>251</width>
-       <height>271</height>
-      </rect>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>249</width>
-        <height>269</height>
-       </rect>
-      </property>
-      <widget class="QWidget" name="widget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>211</width>
-         <height>251</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
     </widget>
     <widget class="QPushButton" name="send">
      <property name="geometry">
@@ -315,10 +236,33 @@
       <string>Edit</string>
      </property>
     </widget>
+    <widget class="QTextBrowser" name="messages">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>931</width>
+       <height>441</height>
+      </rect>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="users">
+     <property name="geometry">
+      <rect>
+       <x>1010</x>
+       <y>390</y>
+       <width>256</width>
+       <height>251</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="Files">
     <attribute name="title">
-     <string>Tab 2</string>
+     <string>Files</string>
     </attribute>
     <widget class="QScrollArea" name="scrollArea">
      <property name="geometry">
@@ -372,5 +316,22 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>close</sender>
+   <signal>clicked()</signal>
+   <receiver>tabWidget</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>918</x>
+     <y>755</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1035</x>
+     <y>742</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
