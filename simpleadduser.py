@@ -1,8 +1,4 @@
-import socketserver
-from time import ctime
 import sqlite3
-import struct
-BUFFSIZE = 1024
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -12,6 +8,7 @@ dbconn = sqlite3.connect('user.db')
 dbconn.row_factory = dict_factory
 c = dbconn.cursor()
 dbconn.commit()
-c.execute('select * from users')
-users = c.fetchall()
-print(users)
+c.execute("INSERT INTO USERS (NAME,AGE,ADDRESS,PASSWORD) VALUES ( 'lxy',19, 'Tianjing','12345' )");
+dbconn.commit()
+
+dbconn.close()

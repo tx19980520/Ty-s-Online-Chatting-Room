@@ -1,7 +1,7 @@
 from socket import *
 import struct
 import pickle
-HOST = '127.0.0.1'
+HOST = '106.15.225.249'
 PORT = 21567
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
