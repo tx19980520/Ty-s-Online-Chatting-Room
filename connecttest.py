@@ -20,12 +20,8 @@ class tcpCliSock(object):
         self.client.sendall(send)
         self.client.recv(4)
 def main():
-    
+
     C = tcpCliSock()
     C.test()
 
 main()
-        
-
-        
-

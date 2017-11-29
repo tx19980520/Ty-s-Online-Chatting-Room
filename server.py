@@ -60,6 +60,7 @@ class MyServer(socketserver.BaseRequestHandler):
     def info(self):
         dicts = self.getDict()
         check = dicts['username']
+        print(check)
         dbconn = sqlite3.connect('user.db')
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
@@ -99,5 +100,5 @@ class MyServer(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    server = socketserver.ThreadingTCPServer(('', 21567), MyServer)
+    server = socketserver.ThreadingTCPServer(('127.0.0.1', 23333), MyServer)
     server.serve_forever()

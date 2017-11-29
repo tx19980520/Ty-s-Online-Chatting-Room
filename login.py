@@ -4,21 +4,29 @@ from PyQt5.QtWidgets import QMessageBox
 from loginbackend import *
 from loginfrontend import *
 from chatting import *
-HOST = '106.15.225.249'
-PORT = 21567
+HOST = '127.0.0.1'
+PORT = 23333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
-class login(self):
+class login(QtCore.QObject):
     def __init__(self):
+        super(login,self).__init__()
         self.window = QtWidgets.QMainWindow()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self.window)
+        self.ui = loginfrontend(self.window)
         self.client = loginbackend()
-        self.ui.register.clicked.connect(self.ui.linkregister)
-        self.ui.login.clicked.connect(self.ui.log);
         self.ui.logSucess.connect(self.enterChatting)
         self.ui.loginInfo.connect(self.client.login)
         self.client.loginResult.connect(self.ui.checklog)
+        self.window.show()
     def enterChatting(self,username):
         self.window.close()
         self.chatting = Chatting(self.client,username)
+
+
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    program = login()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
