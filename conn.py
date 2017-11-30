@@ -12,6 +12,12 @@ dbconn = sqlite3.connect('user.db')
 dbconn.row_factory = dict_factory
 c = dbconn.cursor()
 dbconn.commit()
-c.execute('select * from users')
+#c.execute('''CREATE TABLE FILES
+       #(ID INTEGER PRIMARY KEY autoincrement,
+     #FILENAME           TEXT    NOT NULL,
+      # SIZE            CHAR(50)     NOT NULL,
+       #USERNAME        CHAR(50) NOT NULL
+       #);''')
+c.execute("select * from FILES")
 users = c.fetchall()
 print(users)

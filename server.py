@@ -42,6 +42,34 @@ class MyServer(socketserver.BaseRequestHandler):
         else:
             conn.sendall(command)
     #上述都是为了封装好用
+    def FilesDownload(self):
+        info = self.getDict()
+        f = open(info['filename'],'rb')
+        conn = self.request
+        while True:
+            tmp = f.read(1024)
+            if len(tmp)<1024:
+                dicts = {'data':tmp,'num':-2}
+            else:
+                dicts = {'data':tmp,'num':1024}
+            dicts = pickle.dumps(dicts)
+            l = struct.pack('i',len(dicts))
+            conn.send(l+dicts)
+    def FilesUpload(self):
+        info = self.getDict()
+        dbconn = sqlite3.connect('user.db')
+        dbconn.row_factory = dict_factory
+        cursor = dbconn.cursor()
+        cursor.execute("INSERT INTO FILES (FILENAME,SIZE,USERNAME) VALUES ("+"\'"+info['filename']+"\',\'"+info['size']+"\',\'"+info['username']+"\')")
+        dbconn.commit()
+        dbconn.close()
+        f = open(info['filename'],'wb')
+        while True:
+            byte = self.getDict()
+            if byte['data'] == 123:
+                f.close()
+                break
+            f.write(byte['data'])
     def chat(self):
          package = self.getDict()#sender and message
          package['time'] = ctime()
@@ -89,7 +117,7 @@ class MyServer(socketserver.BaseRequestHandler):
         conn.send(returnCommand)
         return
     def handle(self):
-        self.business= {'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll}
+        self.business= {'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload}
         print('...connected from:'+self.client_address[0])
         Flag = True
         conn = self.request

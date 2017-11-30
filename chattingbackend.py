@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import struct
 import pickle
 from time import sleep
+from files import Filepip,FileDownload
 class Client(QtCore.QThread):
     hasNews = QtCore.pyqtSignal(dict)
     Info = QtCore.pyqtSignal(dict)
