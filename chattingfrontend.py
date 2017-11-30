@@ -13,6 +13,7 @@ from time import sleep
 from chattingui import *
 class chattingfrontend(QtCore.QObject):
     messagetoServer = QtCore.pyqtSignal(str)
+    propare = QtCore.pyqtSignal(str)
     def __init__(self,window):
         super(chattingfrontend,self).__init__()
         self.window = window
@@ -31,6 +32,9 @@ class chattingfrontend(QtCore.QObject):
             error = QMessageBox.warning(self.window, "Warning","你的网络出现问题，无法查询到你的信息！",QMessageBox.Yes)
     def sendMessage(self):
         s = self.gui.Edit.toPlainText()#test ok!
+        if s == "":
+            error = QMessageBox.warning(self.window, "Warning","你不能发送空白消息！",QMessageBox.Yes)
+    def sendMessage(self):
         self.gui.Edit.setPlainText("")
         self.messagetoServer.emit(s)
     def showMessage(self,dicts):
@@ -40,7 +44,24 @@ class chattingfrontend(QtCore.QObject):
         self.gui.messages.append(line2)
     def movecursor(self):
         self.gui.messages.moveCursor(QtGui.QTextCursor.End)
-
+    def setFile(self,files):
+        m = 0
+        row_count = self.gui.tableWidget.rowCount()
+        if self.gui.tabWidget.currentIndex() == 0 or row_count == len(files):
+            return
+        for f in files:
+            button = QtWidgets.QPushButton()
+            button.setText("download")
+            button.clicked.connect(lambda:self.preparefile(m))
+            self.gui.tableWidget.insertRow(row_count)
+            self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(f['FILENAME']))
+            self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(f['SIZE']))
+            self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(f['USERNAME']))
+            self.gui.tableWidget.setCellWidget(row_count,3,button)
+            m += 1
+    def preparefile(self,num):
+         filename = self.gui.tableWidget.itemAt(num,0).text()
+         self.propare.emit(filename)
 def main():
     app = QtWidgets.QApplication(sys.argv)
     w = QtWidgets.QDialog()

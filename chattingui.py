@@ -1,14 +1,21 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'chattingroom.ui'
+#
+# Created by: PyQt5 UI code generator 5.9.1
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+
 class Ui_Chat(QtCore.QObject):
-    #messagetoServer = QtCore.pyqtSignal(str)
-    def __init__(self,Dialog):
-        self.window = Dialog
+    def __init__(self,window):
         super(Ui_Chat,self).__init__()
+        self.window = window
         self.setupUi()
     def setupUi(self):
         self.window.setObjectName("Dialog")
-        self.window.resize(1319, 830)
+        self.window.resize(1310, 830)
         self.label = QtWidgets.QLabel(self.window)
         self.label.setGeometry(QtCore.QRect(20, 0, 321, 61))
         font = QtGui.QFont()
@@ -92,9 +99,9 @@ class Ui_Chat(QtCore.QObject):
         self.address.setText("")
         self.address.setObjectName("address")
         self.verticalLayout.addWidget(self.address)
-        self.pushButton_3 = QtWidgets.QPushButton(self.Chatting)
-        self.pushButton_3.setGeometry(QtCore.QRect(1080, 293, 112, 41))
-        self.pushButton_3.setObjectName("pushButton_3")
+        self.change_info = QtWidgets.QPushButton(self.Chatting)
+        self.change_info.setGeometry(QtCore.QRect(1080, 293, 112, 41))
+        self.change_info.setObjectName("change_info")
         self.messages = QtWidgets.QTextBrowser(self.Chatting)
         self.messages.setGeometry(QtCore.QRect(20, 30, 931, 441))
         self.messages.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -105,17 +112,12 @@ class Ui_Chat(QtCore.QObject):
         self.tabWidget.addTab(self.Chatting, "")
         self.Files = QtWidgets.QWidget()
         self.Files.setObjectName("Files")
-        self.scrollArea = QtWidgets.QScrollArea(self.Files)
-        self.scrollArea.setGeometry(QtCore.QRect(10, 16, 741, 481))
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName("scrollArea")
-        self.scrollAreaWidgetContents_3 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 739, 479))
-        self.scrollAreaWidgetContents_3.setObjectName("scrollAreaWidgetContents_3")
-        self.tableWidget = QtWidgets.QTableWidget(self.scrollAreaWidgetContents_3)
-        self.tableWidget.setGeometry(QtCore.QRect(0, 0, 721, 481))
+        self.tableWidget = QtWidgets.QTableWidget(self.Files)
+        self.tableWidget.setGeometry(QtCore.QRect(30, 20, 1241, 691))
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setColumnCount(4)
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -123,13 +125,21 @@ class Ui_Chat(QtCore.QObject):
         self.tableWidget.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(2, item)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents_3)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        #self.tableWidget.horizontalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(300)
+        self.tableWidget.horizontalHeader().setHighlightSections(True)
         self.tabWidget.addTab(self.Files, "")
+
         self.retranslateUi()
         self.tabWidget.setCurrentIndex(0)
+        self.close.clicked.connect(self.tabWidget.close)
         QtCore.QMetaObject.connectSlotsByName(self.window)
+
     def retranslateUi(self):
-        _translate =QtCore.QCoreApplication.translate
+        _translate = QtCore.QCoreApplication.translate
         self.window.setWindowTitle(_translate("Dialog", "Dialog"))
         self.label.setText(_translate("Dialog", "Ty\'s Chatting Room"))
         self.label_2.setText(_translate("Dialog", "Your own Information"))
@@ -138,10 +148,14 @@ class Ui_Chat(QtCore.QObject):
         self.label_4.setText(_translate("Dialog", "adrress:"))
         self.send.setText(_translate("Dialog", "send"))
         self.close.setText(_translate("Dialog", "close"))
-        self.pushButton_3.setText(_translate("Dialog", "Edit"))
+        self.change_info.setText(_translate("Dialog", "Edit"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Chatting), _translate("Dialog", "Chatting"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("Dialog", "FileName"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("Dialog", "Size"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("Dialog", "uploaders"))
+        item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("Dialog", "operation"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Files), _translate("Dialog", "Files"))

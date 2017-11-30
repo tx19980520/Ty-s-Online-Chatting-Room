@@ -42,10 +42,20 @@ class MyServer(socketserver.BaseRequestHandler):
         else:
             conn.sendall(command)
     #上述都是为了封装好用
+    def fileInfo(self):
+        conn = self.request
+        dbconn = sqlite3.connect('user.db')
+        dbconn.row_factory = dict_factory
+        cursor = dbconn.cursor()
+        cursor.execute("select* from FILES")
+        files = cursor.fetchall()
+        files = pickle.dumps(files)
+        l = struct.pack('i',len(files))
+        conn.sendall(l+files)
     def FilesDownload(self):
+        conn = self.request
         info = self.getDict()
         f = open(info['filename'],'rb')
-        conn = self.request
         while True:
             tmp = f.read(1024)
             if len(tmp)<1024:
@@ -77,8 +87,6 @@ class MyServer(socketserver.BaseRequestHandler):
          chatting.append(package)
     def handlePoll(self):
         package = self.getDict()
-        print(len(chatting))
-        print('num',package['num'])
         if package['num'] == len(chatting) or package['num'] == -1:
             print("here!")
             self.sendPackages(2)#2表示轮询没有新消息
@@ -112,12 +120,14 @@ class MyServer(socketserver.BaseRequestHandler):
             returnCommand =struct.pack('i',1)
             conn.send(returnCommand)
             clientlist.append(user)###这个地方想想咋写
+            hello = {"sender":"administor","message":data['username']+" has entered the chattingroom!",'time':ctime()}
+            chatting.append(hello)
             return
         returnCommand = struct.pack('i',0)
         conn.send(returnCommand)
         return
     def handle(self):
-        self.business= {'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload}
+        self.business= {'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo}
         print('...connected from:'+self.client_address[0])
         Flag = True
         conn = self.request

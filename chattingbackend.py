@@ -2,10 +2,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import struct
 import pickle
 from time import sleep
-from files import Filepip,FileDownload
+from files import FilePip,FileDownload
 class Client(QtCore.QThread):
     hasNews = QtCore.pyqtSignal(dict)
     Info = QtCore.pyqtSignal(dict)
+    fileinfomation = QtCore.pyqtSignal(list)
     def __init__(self,link,username='',age=0,address=''):
         super(Client,self).__init__()
         self.link = link
@@ -49,3 +50,12 @@ class Client(QtCore.QThread):
             info = {}
             info['COMMAND'] = 0
         self.Info.emit(info)
+    def fileInfo(self):
+        command = 7
+        command = self.link.link.commandHandle(command)
+        self.link.link.send(command)
+        receive = self.link.link.receive_packages()#反给我的是一个list里面装的是dict
+        self.fileinfomation.emit(receive)
+    def downloadFile(self,filename):
+        self.thread = FileDownload(filename)
+        self.thread.start()
