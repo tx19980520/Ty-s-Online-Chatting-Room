@@ -11,6 +11,7 @@ ADDR=(HOST,PORT)
 
 class loginbackend(QtCore.QObject):
     loginResult = QtCore.pyqtSignal(int)
+    feedback = QtCore.pyqtSignal(int)#1 is sucess ,0 is has already register
     def __init__(self):
         super(loginbackend,self).__init__()
         self.link = tcp.tcpCliSock()
@@ -22,3 +23,14 @@ class loginbackend(QtCore.QObject):
         self.link.send(command+packages)
         receive = self.link.receive_command()
         self.loginResult.emit(receive)
+    def changelink(self):
+        command = self.link.commandHandle(0)
+        self.link.send(command)
+        self.link.client.close()
+    def RegistertoServer(self,dicts):
+        command = 9
+        command =self.link.commandHandle(command)
+        packages =self.link.packagesHandle(dicts)
+        self.link.send(command+packages)
+        feedback = self.link.receive_command()
+        self.feedback.emit(feedback)

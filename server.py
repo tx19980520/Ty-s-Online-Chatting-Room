@@ -25,6 +25,7 @@ class MyServer(socketserver.BaseRequestHandler):
         receive = conn.recv(4)
         command = struct.unpack('i',receive)[0]
         self.business[str(command)]()
+        return command
     def receiveDict(self,size):
         conn = self.request
         receive = conn.recv(size)
@@ -42,6 +43,39 @@ class MyServer(socketserver.BaseRequestHandler):
         else:
             conn.sendall(command)
     #上述都是为了封装好用
+    def userUpdate(self):
+        conn = self.request
+        update = self.getDict()
+        dbconn = sqlite3.connect("user.db")
+        cursor = dbconn.cursor()
+        cursor.execute("UPDATE USERS SET NAME=\'"+update['name']+"\',PASSWORD=\'"+update['password']+"\',ADDRESS=\'"+update['address']+"\',AGE=\'"+update['age']+"\' WHERE ID="+update['id'])
+        dbconn.commit()
+        self.sendPackages(1)
+    def dbRegister(self):
+        conn = self.request
+        info = self.getDict()
+        dbconn = sqlite3.connect('user.db')
+        cursor = dbconn.cursor()
+        cursor.execute("select id from USERS where name = \'"+info['name']+"\'")
+        result = cursor.fetchall()
+        if result:
+            self.sendPackages(2)
+        else:
+            cursor.execute("INSERT INTO USERS (NAME,AGE,ADDRESS,PASSWORD) VALUES (\'"+info['name']+"\',\'"+info['age']+"\',\'"+info['address']+"\',\'"+info['password']+"\')")
+            dbconn.commit()
+            dbconn.close()
+            self.sendPackages(1)
+    def logDetach(self):
+        return 0
+    def clientDetach(self):
+        conn = self.request
+        info = self.getDict()
+        for i in range(len(clientlist)):
+            if clientlist[i]["NAME"] == info['username']:
+                bye = {"sender":"administor","message":info['username']+" has quited the chattingroom, bye!",'time':ctime()}
+                chatting.append(bye)
+                clientlist.remove(clientlist[i])
+                break
     def fileInfo(self):
         conn = self.request
         dbconn = sqlite3.connect('user.db')
@@ -80,6 +114,11 @@ class MyServer(socketserver.BaseRequestHandler):
                 f.close()
                 break
             f.write(byte['data'])
+        m = {}
+        m["sender"] = "administor"
+        m['time'] = ctime()
+        m["message"] = info['username']+" has uploaded "+info['filename']+" , "+info['size']
+        chatting.append(m)
     def chat(self):
          package = self.getDict()#sender and message
          package['time'] = ctime()
@@ -88,7 +127,6 @@ class MyServer(socketserver.BaseRequestHandler):
     def handlePoll(self):
         package = self.getDict()
         if package['num'] == len(chatting) or package['num'] == -1:
-            print("here!")
             self.sendPackages(2)#2表示轮询没有新消息
         else:
             news = chatting[package['num']]
@@ -102,19 +140,26 @@ class MyServer(socketserver.BaseRequestHandler):
         cursor = dbconn.cursor()
         cursor.execute("SELECT * from users where name= "+"\'"+check+"\'")
         user = cursor.fetchall()[0]
+        cursor.execute("SELECT name FROM users")
+        users = cursor.fetchall()
         if len(chatting) == 0:
             user['NUM'] = len(chatting)#附带一条现在的聊到哪里了
         elif len(chatting) != 0:
             user['NUM'] = len(chatting)-1
+        user['PERSONS'] = str(len(users))
+        user['SPESIFIC'] = clientlist
+        print(users)
+        user['NOW'] = str(len(clientlist))
         self.sendPackages(1,user)
 
     def login(self):
+        print("login")
         conn = self.request
         data = self.getDict()
         dbconn = sqlite3.connect('user.db')
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
-        cursor.execute("SELECT password from users  where name = "+"\'"+data['username']+"\'")
+        cursor.execute("SELECT * from users  where name = "+"\'"+data['username']+"\'")
         user = cursor.fetchall()[0]
         if user['PASSWORD'] == data['password']:
             returnCommand =struct.pack('i',1)
@@ -127,13 +172,14 @@ class MyServer(socketserver.BaseRequestHandler):
         conn.send(returnCommand)
         return
     def handle(self):
-        self.business= {'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo}
+        self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate}
         print('...connected from:'+self.client_address[0])
         Flag = True
         conn = self.request
         while Flag:
-            print("Waiting for connection...")
-            self.Command()
+            cmd = self.Command()
+            if cmd == 8 or cmd == 0:
+                break;
 
 
 

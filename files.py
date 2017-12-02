@@ -11,8 +11,9 @@ BUFSIZE = 1024
 ADDR=(HOST,PORT)
 class FilePip(QtCore.QThread,tcpCliSock):
     hasNewFile = QtCore.pyqtSignal()
+    uploadComplete = QtCore.pyqtSignal(str)
     def __init__(self,filepath,username):
-        super(Filepip,self).__init__()
+        super(FilePip,self).__init__()
         self.path = filepath
         path,self.filename = os.path.split(filepath)
         self.username = username
@@ -37,6 +38,7 @@ class FilePip(QtCore.QThread,tcpCliSock):
             d = {'data':tmp}
             d = self.packagesHandle(d)
             self.send(d)
+        self.uploadComplete.emit(self.filename)
         self.quit()
 class FileDownload(QtCore.QThread,tcpCliSock):
     def __init__(self,filename):

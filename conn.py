@@ -18,6 +18,6 @@ dbconn.commit()
       # SIZE            CHAR(50)     NOT NULL,
        #USERNAME        CHAR(50) NOT NULL
        #);''')
-c.execute("select * from FILES")
+c.execute("select * from users")
 users = c.fetchall()
 print(users)

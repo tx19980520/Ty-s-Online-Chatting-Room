@@ -13,6 +13,7 @@ import pickle
 from time import ctime
 from chatting import *
 from loginui import *
+from register import *
 import tcpclisock as tcp
 HOST = '106.15.225.249'
 PORT = 21567
@@ -23,17 +24,17 @@ ADDR=(HOST,PORT)
 class loginfrontend(QtCore.QObject):
     loginInfo = QtCore.pyqtSignal(str,str)#向后台传输
     logSucess = QtCore.pyqtSignal(str)#向上级传输
+    loginFailed = QtCore.pyqtSignal()
     def __init__(self,window):
         super(loginfrontend,self).__init__()
         self.window = window
+        self.window.enter.connect(self.log)
         self.gui = Ui_Login(window)
         self.gui.login.clicked.connect(self.log)
-        self.gui.find.clicked.connect(self.linkfind)
-        self.gui.register.clicked.connect(self.linkregister)#在这里把部分不涉及与顶层直接有关的信号在这里做connect
-    def linkregister(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn/register'))
-    def linkfind(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn/find'))
+        self.gui.follow.clicked.connect(self.linkfollow)
+        #self.gui.register.clicked.connect(self.linkregister)#在这里把部分不涉及与顶层直接有关的信号在这里做connect
+    def linkfollow(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn'))
     def log(self):
         if self.gui.username.text() == "":
             reply = QMessageBox.warning(self.window, 'Warning', '请输入昵称!', QMessageBox.Yes)
@@ -46,7 +47,7 @@ class loginfrontend(QtCore.QObject):
     def checklog(self,receive):
         if receive != 1:
             error = QMessageBox.warning(self.window, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
-            client.close()
+            self.loginFailed.emit()
         else:
             self.logSucess.emit(self.gui.username.text())
 

@@ -5,7 +5,6 @@ HOST = '127.0.0.1'
 PORT = 23333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
-
 class tcpCliSock(object):
     def __init__(self):
         self.client = socket(AF_INET, SOCK_STREAM)
