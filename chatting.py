@@ -21,6 +21,7 @@ class Chatting(QtCore.QObject):
         self.ui.propare.connect(self.client.downloadFile)
         self.ui.detach.connect(self.client.detach)
         self.ui.newFile.connect(self.client.addFile)
+        self.ui.newPhoto.connect(self.client.addPhoto)
         self.client.senduploadsucess.connect(self.ui.sucessinfo)
         self.client.detachlink.connect(self.detachLink)
         self.client.getInfo()

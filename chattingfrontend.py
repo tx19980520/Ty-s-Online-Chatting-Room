@@ -16,6 +16,8 @@ class chattingfrontend(QtCore.QObject):
     propare = QtCore.pyqtSignal(str)
     detach = QtCore.pyqtSignal()
     newFile = QtCore.pyqtSignal(str)
+    newPhoto = QtCore.pyqtSignal(str,int)
+    messageImage = QtCore.pyqtSignal(str)
     def __init__(self,window):
         super(chattingfrontend,self).__init__()
         self.now = 0
@@ -28,6 +30,10 @@ class chattingfrontend(QtCore.QObject):
         self.gui.send.clicked.connect(self.sendMessage)
         self.gui.close.clicked.connect(self.closeReady)
         self.gui.upload.clicked.connect(self.chooseFile)
+        self.gui.photo.clicked.connect(self.choosePhoto)
+    def choosePhoto(self):
+        filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择发送图片（可多选）","D:/","Image Files(*.png *.jpg *.bmp *.gif)")
+        self.newPhoto.emit(filepath[0],1)
     def chooseFile(self):
         filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择上传文件（可多选）","C:/","All Files (*)")
         self.newFile.emit(filepath[0])
@@ -94,8 +100,17 @@ class chattingfrontend(QtCore.QObject):
                 self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
                 self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
                 self.gui.tableWidget.setCellWidget(row_count,3,button)
+        elif "@image:" in dicts['message']:
+            filename = "message/image/"+dicts['message'][7:]
+            filename = self.changeHtml(filename)
+            self.gui.messages.append(line1)
+            self.gui.messages.insertHtml(filename)
+            return
         self.gui.messages.append(line1)
         self.gui.messages.append(line2)
+    def changeHtml(self,filename):
+        s = "<br><img src=\"%s\">"%(filename)
+        return s
     def movecursor(self):
         self.gui.messages.moveCursor(QtGui.QTextCursor.End)
     def setFile(self,files):

@@ -32,6 +32,10 @@ class Client(QtCore.QThread):
             if command == 3:
                 packages = self.link.receive_packages()
                 self.num += 1
+                if "@image:" in packages['message']:
+                    self.downloadImageMessage(packages["message"][7:])
+                    while not self.imageDownloadThread.singal:
+                        sleep(0.2)
                 self.hasNews.emit(packages)
             elif command == 0 or command == 8:
                 break
@@ -66,10 +70,16 @@ class Client(QtCore.QThread):
     def downloadFile(self,filename):
         self.downloadThread = FileDownload(filename)
         self.downloadThread.start()
+    def downloadImageMessage(self,filename):
+        self.imageDownloadThread = FileDownload(filename,1)
+        self.imageDownloadThread.start()
     def addFile(self,filepath):
         self.uploadThread = FilePip(filepath,self.username)
         self.uploadThread.uploadComplete.connect(self.sendUploadSucess)
         self.uploadThread.start()
+    def addPhoto(self,filepath,special):
+        self.photoThread = FilePip(filepath,self.username,special)
+        self.photoThread.start()
     def sendUploadSucess(self,s):
         self.senduploadsucess.emit(s)
     def detach(self):
