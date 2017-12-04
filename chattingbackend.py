@@ -44,7 +44,7 @@ class Client(QtCore.QThread):
         command = 2
         command = self.link.commandHandle(command)
         packages = {'username':self.username}
-        packages = pickle.dumps(packages)
+        packages = pickle.dumps(packages,protocol=1)
         lpackages = len(packages)
         lpackages = struct.pack('i',lpackages)
         self.link.send(command+lpackages+packages)
@@ -88,7 +88,7 @@ class Client(QtCore.QThread):
         command = 8
         command = self.link.commandHandle(command)
         packages = {"username":self.username}
-        packages = pickle.dumps(packages)
+        packages = pickle.dumps(packages,protocol=1)
         lpackages = len(packages)
         lpackages = struct.pack('i',lpackages)
         self.link.send(command+lpackages+packages)

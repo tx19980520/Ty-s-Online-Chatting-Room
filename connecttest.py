@@ -13,7 +13,7 @@ class tcpCliSock(object):
     def test(self):
         self.link()
         packages = {'username':'Ty','password':'1234512345qwe'}
-        packages = pickle.dumps(packages)
+        packages = pickle.dumps(packages,0)
         command = struct.pack('i',1)
         packagelen = struct.pack("i",len(packages))
         send = command+packagelen+packages

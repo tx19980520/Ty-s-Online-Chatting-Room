@@ -92,7 +92,8 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                 break
             f.write(packages['data'])
         self.singal = True
-        self.imageAdjust("message/image/"+self.filename)
+        if self.special == 1:
+            self.imageAdjust("message/image/"+self.filename)
         self.quit()
     def imageAdjust(self,s):
         im = Image.open(s)

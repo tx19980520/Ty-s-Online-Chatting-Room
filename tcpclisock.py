@@ -1,7 +1,7 @@
 from socket import *
 import struct
 import pickle
-HOST = '127.0.0.1'
+HOST = '106.15.225.249'
 PORT = 23333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
@@ -24,7 +24,7 @@ class tcpCliSock(object):
     def commandHandle(self,command):
         return struct.pack('i',command)
     def packagesHandle(self,dicts):
-        dicts = pickle.dumps(dicts)
+        dicts = pickle.dumps(dicts,protocol=1)
         size = len(dicts)
         size = struct.pack('i',size)
         return size+dicts

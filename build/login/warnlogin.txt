@@ -1,0 +1,24 @@
+missing module named resource - imported by posix, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named posix - imported by os, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named _posixsubprocess - imported by subprocess, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named 'org.python' - imported by pickle, D:\各类文献\计算机\python\Python programming\homework\login.py, xml.sax
+missing module named readline - imported by cmd, code, pdb, D:\各类文献\计算机\python\Python programming\homework\login.py
+excluded module named _frozen_importlib - imported by importlib, importlib.abc, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named _frozen_importlib_external - imported by importlib._bootstrap, importlib, importlib.abc, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named _winreg - imported by platform, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named _scproxy - imported by urllib.request
+missing module named java - imported by platform, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named 'java.lang' - imported by platform, D:\各类文献\计算机\python\Python programming\homework\login.py, xml.sax._exceptions
+missing module named vms_lib - imported by platform, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named termios - imported by tty, D:\各类文献\计算机\python\Python programming\homework\login.py, getpass
+missing module named grp - imported by tarfile, shutil, pathlib, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named pwd - imported by posixpath, tarfile, shutil, http.server, webbrowser, pathlib, D:\各类文献\计算机\python\Python programming\homework\login.py, netrc, getpass
+missing module named ce - imported by os, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named _dummy_threading - imported by dummy_threading, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named org - imported by copy, D:\各类文献\计算机\python\Python programming\homework\login.py
+missing module named Tkinter - imported by PIL.ImageTk
+missing module named 'PySide.QtCore' - imported by PIL.ImageQt
+missing module named 'PyQt4.QtCore' - imported by PIL.ImageQt
+missing module named pathlib2 - imported by PIL.Image
+missing module named cffi - imported by PIL.Image, PIL.PyAccess, PIL.ImageTk
+missing module named __builtin__ - imported by PIL.Image
