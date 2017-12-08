@@ -12,12 +12,8 @@ dbconn = sqlite3.connect('user.db')
 dbconn.row_factory = dict_factory
 c = dbconn.cursor()
 dbconn.commit()
-#c.execute('''CREATE TABLE FILES
-       #(ID INTEGER PRIMARY KEY autoincrement,
-     #FILENAME           TEXT    NOT NULL,
-      # SIZE            CHAR(50)     NOT NULL,
-       #USERNAME        CHAR(50) NOT NULL
-       #);''')
-c.execute("select * from users")
-users = c.fetchall()
-print(users)
+c.execute("delete from files where filename='tx.mp3'")
+dbconn.commit()
+c.execute("select * from files")
+s = c.fetchall()
+print(s)

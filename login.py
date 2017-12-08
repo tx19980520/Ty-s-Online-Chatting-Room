@@ -5,11 +5,12 @@ from loginbackend import *
 from loginfrontend import *
 from chatting import *
 HOST = '106.15.225.249'
-PORT = 23333
+PORT = 14333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
 class Qmain(QtWidgets.QMainWindow):
     enter = QtCore.pyqtSignal()
+    closes = QtCore.pyqtSignal()
     def __init__(self):
         super(Qmain,self).__init__()
     def keyPressEvent(self,e):
@@ -21,6 +22,7 @@ class login(QtCore.QObject):
         self.window = Qmain()
         self.ui = loginfrontend(self.window)
         self.client = loginbackend()
+        self.window.closes.connect(self.client.Close)
         self.ui.logSucess.connect(self.enterChatting)
         self.ui.loginInfo.connect(self.client.login)
         self.ui.loginFailed.connect(self.client.link.client.close)

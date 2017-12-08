@@ -1,10 +1,10 @@
 import socketserver
 from time import ctime
+impoty json
 import sqlite3
 import struct
 import pickle
 from time import ctime
-from queue import *
 BUFFSIZE = 4
 def dict_factory(cursor, row):
     d = {}
@@ -32,7 +32,10 @@ class MyServer(socketserver.BaseRequestHandler):
         dicts = pickle.loads(receive)
         return dicts;
     def getDict(self):
-        return self.receiveDict(self.receiveSize())
+        try:
+            return self.receiveDict(self.receiveSize())
+        except:
+            return None
     def sendPackages(self, command, dicts = None):
         conn = self.request
         command = struct.pack('i',command)
@@ -63,7 +66,7 @@ class MyServer(socketserver.BaseRequestHandler):
         update = self.getDict()
         dbconn = sqlite3.connect("user.db")
         cursor = dbconn.cursor()
-        cursor.execute("UPDATE USERS SET NAME=\'"+update['name']+"\',PASSWORD=\'"+update['password']+"\',ADDRESS=\'"+update['address']+"\',AGE=\'"+update['age']+"\' WHERE ID="+update['id'])
+        cursor.execute("UPDATE USERS SET NAME=\'"+update['name']+"\',PASSWORD=\'"+update['password']+"\',ADDRESS=\'"+update['address']+"\',AGE=\'"+update['age']+"\' WHERE ID="+str(update['id']))
         dbconn.commit()
         self.sendPackages(1)
     def dbRegister(self):
@@ -82,6 +85,13 @@ class MyServer(socketserver.BaseRequestHandler):
             self.sendPackages(1)
     def logDetach(self):
         return 0
+    def checkAnyonehere(self):
+        if len(clientlist) == 0:
+            global chatting
+            with open("history/"+ctime()+'.txt',"w") as f:
+                for message in chatting:
+                    json.dump(message,f)
+            chatting = []
     def clientDetach(self):
         conn = self.request
         info = self.getDict()
@@ -91,6 +101,7 @@ class MyServer(socketserver.BaseRequestHandler):
                 chatting.append(bye)
                 clientlist.remove(clientlist[i])
                 break
+        self.checkAnyonehere()
     def fileInfo(self):
         conn = self.request
         dbconn = sqlite3.connect('user.db')
@@ -113,11 +124,11 @@ class MyServer(socketserver.BaseRequestHandler):
                 dicts = {'data':tmp,'num':1024}
             dicts = pickle.dumps(dicts)
             l = struct.pack('i',len(dicts))
-            conn.send(l+dicts)
+            conn.sendall(l+dicts)
     def FilesDownload(self):
         conn = self.request
         info = self.getDict()
-        f = open(info['filename'],'rb')
+        f = open("files/"+info['filename'],'rb')
         while True:
             tmp = f.read(1024)
             if len(tmp)<1024:
@@ -126,22 +137,26 @@ class MyServer(socketserver.BaseRequestHandler):
                 dicts = {'data':tmp,'num':1024}
             dicts = pickle.dumps(dicts)
             l = struct.pack('i',len(dicts))
-            conn.send(l+dicts)
+            conn.sendall(l+dicts)
+        f.close()
     def FilesUpload(self):
         info = self.getDict()
+        f = open("files/"+info['filename'],'wb')
+        t= True
+        while t:
+            byte = self.getDict()
+            if byte == None:
+                break
+            elif byte['num'] == -2:
+                t = False
+            f.write(byte['data'])
+        f.close()
         dbconn = sqlite3.connect('user.db')
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
         cursor.execute("INSERT INTO FILES (FILENAME,SIZE,USERNAME) VALUES ("+"\'"+info['filename']+"\',\'"+info['size']+"\',\'"+info['username']+"\')")
         dbconn.commit()
         dbconn.close()
-        f = open(info['filename'],'wb')
-        while True:
-            byte = self.getDict()
-            if byte['data'] == 123:
-                f.close()
-                break
-            f.write(byte['data'])
         m = {}
         m["sender"] = "administor"
         m['time'] = ctime()
@@ -162,7 +177,6 @@ class MyServer(socketserver.BaseRequestHandler):
     def info(self):
         dicts = self.getDict()
         check = dicts['username']
-        print(check)
         dbconn = sqlite3.connect('user.db')
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
@@ -179,7 +193,13 @@ class MyServer(socketserver.BaseRequestHandler):
         print(users)
         user['NOW'] = str(len(clientlist))
         self.sendPackages(1,user)
-
+    def donwloadHistory(self):
+        conn = self.request
+        files = os.walk("history/")[2]:
+        tmp = {"files":files}
+        tmp = pickle.dumps(tmp)
+        l = struct.pack("i",len(tmp))
+        conn.sendall(l+tmp)
     def login(self):
         print("login")
         conn = self.request
@@ -191,16 +211,16 @@ class MyServer(socketserver.BaseRequestHandler):
         user = cursor.fetchall()[0]
         if user['PASSWORD'] == data['password']:
             returnCommand =struct.pack('i',1)
-            conn.send(returnCommand)
+            conn.sendall(returnCommand)
             clientlist.append(user)###这个地方想想咋写
             hello = {"sender":"administor","message":data['username']+" has entered the chattingroom!",'time':ctime()}
             chatting.append(hello)
             return
         returnCommand = struct.pack('i',0)
-        conn.send(returnCommand)
+        conn.sendall(returnCommand)
         return
     def handle(self):
-        self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage}
+        self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage,"13":self.downloadHistory}
         print('...connected from:'+self.client_address[0])
         Flag = True
         conn = self.request
@@ -212,5 +232,6 @@ class MyServer(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    server = socketserver.ThreadingTCPServer(('127.0.0.1', 23333), MyServer)
+    print("here")
+    server = socketserver.ThreadingTCPServer(('0.0.0.0', 14333), MyServer)
     server.serve_forever()

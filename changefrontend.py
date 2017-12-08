@@ -15,7 +15,7 @@ class changefrontend(QtCore.QObject):
         self.gui.name.setText(self.ori['username'])
         self.gui.age.setText(str(self.ori['age']))
         self.gui.password1.setText(self.ori['password'])
-        self.gui.address.steText(self.ori['address'])
+        self.gui.address.setText(self.ori['address'])
     def collect(self):
         if self.gui.password1.text() != self.gui.password2.text():
             error = QMessageBox.warning(self.window, "Warning", "两次密码不相同!",QMessageBox.Yes)
@@ -26,6 +26,7 @@ class changefrontend(QtCore.QObject):
             self.changeInfo.emit(tmp)
     def showChangeResult(self,command):
         if command == 1:
-            sucess =QMessageBox.about(self.window,"Sucess!","您已注册成功！")
+            sucess =QMessageBox.about(self.window,"Sucess!","您已修改成功！")
+            self.window.close()
         elif command == 0:
             error = QMessageBox.warning(self.window, "Warning", "修改失败",QMessageBox.Yes)

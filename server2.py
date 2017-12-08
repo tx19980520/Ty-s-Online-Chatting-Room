@@ -8,7 +8,7 @@ import sqlite3
 import struct
 import pickle
 from time import ctime
-BUFFSIZE = 4
+BUFFSIZE = 2048
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -120,11 +120,15 @@ class MyServer(SocketServer.BaseRequestHandler):
     def FilesDownload(self):
         conn = self.request
         info = self.getDict()
-        f = open(info['filename'],'rb')
+        f = open("files/"+info['filename'],'rb')
         while True:
-            tmp = f.read(1024)
-            if len(tmp)<1024:
+            print "now"
+            tmp = f.read(BUFFSIZE)
+            print type(tmp)
+            if len(tmp)<2047:
                 dicts = {'data':tmp,'num':-2}
+                f.close()
+                break;
             else:
                 dicts = {'data':tmp,'num':1024}
             dicts = pickle.dumps(dicts)
@@ -201,6 +205,7 @@ class MyServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage}
         print '...connected from:'+self.client_address[0]
+        print "now"
         Flag = True
         conn = self.request
         while Flag:
@@ -210,6 +215,5 @@ class MyServer(SocketServer.BaseRequestHandler):
 
 
 
-if __name__ == '__main__':
-    server = SocketServer.ThreadingTCPServer(('0.0.0.0', 23333), MyServer)
-    server.serve_forever()
+server = SocketServer.ThreadingTCPServer(('0.0.0.0', 14333), MyServer)
+server.serve_forever()

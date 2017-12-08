@@ -2,7 +2,7 @@ from socket import *
 import struct
 import pickle
 HOST = '106.15.225.249'
-PORT = 23333
+PORT = 14333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
 class tcpCliSock(object):
@@ -19,12 +19,15 @@ class tcpCliSock(object):
         receive = self.client.recv(4)
         size = struct.unpack('i',receive)[0]
         packages = self.client.recv(size)
-        packages = pickle.loads(packages)
+        try:
+            packages = pickle.loads(packages)
+        except EOFError:
+            return None
         return packages
     def commandHandle(self,command):
         return struct.pack('i',command)
     def packagesHandle(self,dicts):
-        dicts = pickle.dumps(dicts,protocol=1)
+        dicts = pickle.dumps(dicts)
         size = len(dicts)
         size = struct.pack('i',size)
         return size+dicts
@@ -35,3 +38,7 @@ class tcpCliSock(object):
         packages = command + packages
         self.send(packages)
         return self.receive_command()
+    def Close(self):
+        command = self.commandHandle(0)
+        self.send(command)
+        self.client.close()

@@ -25,6 +25,7 @@ class Ui_Login(QtCore.QObject):
         self.password = QtWidgets.QLineEdit(self.centralwidget)
         self.password.setGeometry(QtCore.QRect(190, 230, 200, 35))
         self.password.setObjectName("password")
+        self.password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(90, 150, 100, 30))
         font = QtGui.QFont()

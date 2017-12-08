@@ -9,6 +9,7 @@ class Client(QtCore.QThread):
     fileinfomation = QtCore.pyqtSignal(list)
     detachlink = QtCore.pyqtSignal()
     senduploadsucess = QtCore.pyqtSignal(str)
+    senddonwloadsucess = QtCore.pyqtSignal(str)
     changeresult = QtCore.pyqtSignal(int)
     def __init__(self,link,username='',age=0,address=''):
         super(Client,self).__init__()
@@ -44,7 +45,7 @@ class Client(QtCore.QThread):
         command = 2
         command = self.link.commandHandle(command)
         packages = {'username':self.username}
-        packages = pickle.dumps(packages,protocol=1)
+        packages = pickle.dumps(packages)
         lpackages = len(packages)
         lpackages = struct.pack('i',lpackages)
         self.link.send(command+lpackages+packages)
@@ -69,6 +70,7 @@ class Client(QtCore.QThread):
         self.fileinfomation.emit(receive)
     def downloadFile(self,filename):
         self.downloadThread = FileDownload(filename)
+        self.downloadThread.downloadSucess.connect(self.sendDonwloadSucess)
         self.downloadThread.start()
     def downloadImageMessage(self,filename):
         self.imageDownloadThread = FileDownload(filename,1)
@@ -82,13 +84,15 @@ class Client(QtCore.QThread):
         self.photoThread.start()
     def sendUploadSucess(self,s):
         self.senduploadsucess.emit(s)
+    def sendDownloadSucess(self,s):
+        self.senddonwloadsucess.emit(s)
     def detach(self):
         self.q= True
         sleep(1)
         command = 8
         command = self.link.commandHandle(command)
         packages = {"username":self.username}
-        packages = pickle.dumps(packages,protocol=1)
+        packages = pickle.dumps(packages)
         lpackages = len(packages)
         lpackages = struct.pack('i',lpackages)
         self.link.send(command+lpackages+packages)
@@ -97,6 +101,12 @@ class Client(QtCore.QThread):
         command = self.link.commandHandle(10)
         dicts['id'] = self.id
         packages = self.link.packagesHandle(dicts)
-        self.link.send(command+packages)
+        self.link.sendPackages(command,packages)
         feedback = self.link.receive_command()
-        self.changresult.emit(feedback)
+        self.changeresult.emit(feedback)
+    def history(self):
+        command = self.link.commandHandle(13)
+        self.link.sendPackages(command)
+        feedback = self.link.receive_packages()
+        self.historyThread = FileDownload(files=feedback["files"])
+        self.historyThread.start()

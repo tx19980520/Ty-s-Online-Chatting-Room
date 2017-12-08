@@ -23,6 +23,7 @@ class registerfrontend(QtCore.QObject):
     def registerFeedback(self,num):
         if num == 1:
             sucess =QMessageBox.about(self.window,"Sucess!","您已注册成功！")
+            self.window.close()
         elif num == 2:
             self.gui.name.setText("")
             error = QMessageBox.warning(self.window, "Warning", "该昵称已被使用",QMessageBox.Yes)

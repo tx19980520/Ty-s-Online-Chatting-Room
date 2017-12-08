@@ -11,6 +11,15 @@ import tcpclisock as tcp
 from PyQt5.QtWidgets import QMessageBox
 from time import sleep
 from chattingui import *
+class downloadButton(QtWidgets.QPushButton):
+    def __init__(self,i):
+        super(downloadButton,self).__init__()
+        self.id = i
+        self.setText("Download")
+        self.setStyleSheet(''' text-align : center;                                       background-color : NavajoWhite;
+                                            height : 30px;
+                                            border-style: outset;
+                                           font : 17px  ''')
 class chattingfrontend(QtCore.QObject):
     messagetoServer = QtCore.pyqtSignal(str)
     propare = QtCore.pyqtSignal(str)
@@ -37,7 +46,9 @@ class chattingfrontend(QtCore.QObject):
     def chooseFile(self):
         filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择上传文件（可多选）","C:/","All Files (*)")
         self.newFile.emit(filepath[0])
-    def sucessinfo(self,s):
+    def downloadSucessInfo(self,s):
+        sucess =QMessageBox.about(self.window,"Sucess!","您已成功下载%s！"%(s))
+    def uploadSucessInfo(self,s):
         sucess =QMessageBox.about(self.window,"Sucess!","您已成功上传%s！"%(s))
     def closeReady(self):
         self.gui.window.close()
@@ -66,6 +77,7 @@ class chattingfrontend(QtCore.QObject):
         s = self.gui.Edit.toPlainText()#test ok!
         if s == "":
             error = QMessageBox.warning(self.window, "Warning","你不能发送空白消息！",QMessageBox.Yes)
+            return
         self.gui.Edit.setPlainText("")
         self.messagetoServer.emit(s)
     def showMessage(self,dicts):
@@ -93,35 +105,48 @@ class chattingfrontend(QtCore.QObject):
             elif "uploaded" in tmp:
                 row_count = self.gui.tableWidget.rowCount()
                 self.gui.tableWidget.insertRow(row_count)
-                button = QtWidgets.QPushButton()
-                button.setText("download")
-                button.clicked.connect(lambda:self.preparefile(row_count))
+                button = downloadButton(row_count)
+                button.clicked.connect(lambda:self.preparefile(button.id))
                 self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(tmp[3]))
                 self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
                 self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
                 self.gui.tableWidget.setCellWidget(row_count,3,button)
-        elif "@image:" in dicts['message']:
-            filename = "message/image/"+dicts['message'][7:]
-            filename = self.changeHtml(filename)
+            elif "@image:" in dicts['message']:
+                filename = "message/image/"+dicts['message'][7:]
+                filename = self.changeHtml(filename)
+                self.gui.messages.append(line1)
+                self.gui.messages.insertHtml(filename)
+                return
+            line1 = self.adminmessage(line1)
+            line2 = self.adminmessage(line2)
+            self.gui.messages.insertHtml(line1)
+            self.gui.messages.insertHtml(line2)
+        else:
+            line1 = self.normalmessage(line1)
+            line2 = self.normalmessage(line2)
             self.gui.messages.append(line1)
-            self.gui.messages.insertHtml(filename)
-            return
-        self.gui.messages.append(line1)
-        self.gui.messages.append(line2)
+            self.gui.messages.append(line2)
+    def normalmessage(self,s):
+        l = "<br><font size='4'>%s</font>"%(s)
+        return l
+    def adminmessage(self,s):
+        l = "<br><font size='4' color='red'>%s</font>"%(s)
+        return l
     def changeHtml(self,filename):
         s = "<br><img src=\"%s\">"%(filename)
         return s
     def movecursor(self):
         self.gui.messages.moveCursor(QtGui.QTextCursor.End)
     def setFile(self,files):
-        m = 0
         row_count = self.gui.tableWidget.rowCount()
         if self.gui.tabWidget.currentIndex() == 0 or row_count >= len(files):
             return
+        num = range(len(files))
+        m = 0
         for f in files:
-            button = QtWidgets.QPushButton()
-            button.setText("download")
-            button.clicked.connect(lambda:self.preparefile(m))
+            p = m
+            button = downloadButton(p)
+            button.clicked.connect(lambda:self.preparefile(button.id))
             row_count = self.gui.tableWidget.rowCount()
             self.gui.tableWidget.insertRow(row_count)
             self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(f['FILENAME']))
@@ -130,8 +155,10 @@ class chattingfrontend(QtCore.QObject):
             self.gui.tableWidget.setCellWidget(row_count,3,button)
             m += 1
     def preparefile(self,num):
-         filename = self.gui.tableWidget.itemAt(num,0).text()
-         self.propare.emit(filename)
+        print (num)
+        filename = self.gui.tableWidget.item(num-1,0).text()
+        print (filename)
+        self.propare.emit(filename)
 def main():
     app = QtWidgets.QApplication(sys.argv)
     w = QtWidgets.QDialog()

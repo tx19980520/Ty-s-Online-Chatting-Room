@@ -34,3 +34,5 @@ class loginbackend(QtCore.QObject):
         self.link.send(command+packages)
         feedback = self.link.receive_command()
         self.feedback.emit(feedback)
+    def Close(self):
+        self.link.Close()
