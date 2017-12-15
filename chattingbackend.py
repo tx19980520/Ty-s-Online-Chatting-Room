@@ -35,7 +35,7 @@ class Client(QtCore.QThread):
                 self.num += 1
                 if "@image:" in packages['message']:
                     self.downloadImageMessage(packages["message"][7:])
-                    while not self.imageDownloadThread.singal:
+                    while not self.imageDownloadThread.signal:
                         sleep(0.2)
                 self.hasNews.emit(packages)
             elif command == 0 or command == 8:
@@ -67,10 +67,11 @@ class Client(QtCore.QThread):
         command = self.link.commandHandle(command)
         self.link.send(command)
         receive = self.link.receive_packages()#反给我的是一个list里面装的是dict
+        print(receive)
         self.fileinfomation.emit(receive)
     def downloadFile(self,filename):
         self.downloadThread = FileDownload(filename)
-        self.downloadThread.downloadSucess.connect(self.sendDonwloadSucess)
+        self.downloadThread.downloadSucess.connect(self.sendDownloadSucess)
         self.downloadThread.start()
     def downloadImageMessage(self,filename):
         self.imageDownloadThread = FileDownload(filename,1)
@@ -104,9 +105,3 @@ class Client(QtCore.QThread):
         self.link.sendPackages(command,packages)
         feedback = self.link.receive_command()
         self.changeresult.emit(feedback)
-    def history(self):
-        command = self.link.commandHandle(13)
-        self.link.sendPackages(command)
-        feedback = self.link.receive_packages()
-        self.historyThread = FileDownload(files=feedback["files"])
-        self.historyThread.start()

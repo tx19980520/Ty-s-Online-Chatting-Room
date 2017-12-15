@@ -12,14 +12,18 @@ from PyQt5.QtWidgets import QMessageBox
 from time import sleep
 from chattingui import *
 class downloadButton(QtWidgets.QPushButton):
+    shot_id = QtCore.pyqtSignal(int)
     def __init__(self,i):
         super(downloadButton,self).__init__()
         self.id = i
+        self.clicked.connect(self.shot)
         self.setText("Download")
         self.setStyleSheet(''' text-align : center;                                       background-color : NavajoWhite;
                                             height : 30px;
                                             border-style: outset;
                                            font : 17px  ''')
+    def shot(self):
+        self.shot_id.emit(self.id)
 class chattingfrontend(QtCore.QObject):
     messagetoServer = QtCore.pyqtSignal(str)
     propare = QtCore.pyqtSignal(str)
@@ -29,15 +33,14 @@ class chattingfrontend(QtCore.QObject):
     messageImage = QtCore.pyqtSignal(str)
     def __init__(self,window):
         super(chattingfrontend,self).__init__()
+        self.buttons = []
         self.now = 0
         self.allPersons = 0
         self.window = window
         self.username = ''
         self.gui = Ui_Chat(window)
-        self.gui.close.clicked.connect(self.window.close)
         self.gui.messages.textChanged.connect(self.movecursor)
         self.gui.send.clicked.connect(self.sendMessage)
-        self.gui.close.clicked.connect(self.closeReady)
         self.gui.upload.clicked.connect(self.chooseFile)
         self.gui.photo.clicked.connect(self.choosePhoto)
     def choosePhoto(self):
@@ -51,7 +54,6 @@ class chattingfrontend(QtCore.QObject):
     def uploadSucessInfo(self,s):
         sucess =QMessageBox.about(self.window,"Sucess!","您已成功上传%s！"%(s))
     def closeReady(self):
-        self.gui.window.close()
         self.detach.emit()
     def clientNow(self,text,l=None):
         _translate =QtCore.QCoreApplication.translate
@@ -106,21 +108,23 @@ class chattingfrontend(QtCore.QObject):
                 row_count = self.gui.tableWidget.rowCount()
                 self.gui.tableWidget.insertRow(row_count)
                 button = downloadButton(row_count)
-                button.clicked.connect(lambda:self.preparefile(button.id))
+                self.buttons.append(button)
+                button.shot_id.connect(self.preparefile)
                 self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(tmp[3]))
                 self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
                 self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
                 self.gui.tableWidget.setCellWidget(row_count,3,button)
-            elif "@image:" in dicts['message']:
-                filename = "message/image/"+dicts['message'][7:]
-                filename = self.changeHtml(filename)
-                self.gui.messages.append(line1)
-                self.gui.messages.insertHtml(filename)
+                line1 = self.adminmessage(line1)
+                line2 = self.adminmessage(line2)
+                self.gui.messages.insertHtml(line1)
+                self.gui.messages.insertHtml(line2)
                 return
-            line1 = self.adminmessage(line1)
-            line2 = self.adminmessage(line2)
-            self.gui.messages.insertHtml(line1)
-            self.gui.messages.insertHtml(line2)
+        elif "@image:" in dicts['message']:
+            filename = "message/image/"+dicts['message'][7:]
+            filename = self.changeHtml(filename)
+            self.gui.messages.append(line1)
+            self.gui.messages.insertHtml(filename)
+            return
         else:
             line1 = self.normalmessage(line1)
             line2 = self.normalmessage(line2)
@@ -146,7 +150,8 @@ class chattingfrontend(QtCore.QObject):
         for f in files:
             p = m
             button = downloadButton(p)
-            button.clicked.connect(lambda:self.preparefile(button.id))
+            self.buttons.append(button)
+            button.shot_id.connect(self.preparefile)
             row_count = self.gui.tableWidget.rowCount()
             self.gui.tableWidget.insertRow(row_count)
             self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(f['FILENAME']))
@@ -156,7 +161,7 @@ class chattingfrontend(QtCore.QObject):
             m += 1
     def preparefile(self,num):
         print (num)
-        filename = self.gui.tableWidget.item(num-1,0).text()
+        filename = self.gui.tableWidget.item(num,0).text()
         print (filename)
         self.propare.emit(filename)
 def main():

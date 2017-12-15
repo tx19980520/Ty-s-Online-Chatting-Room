@@ -47,7 +47,6 @@ class loginfrontend(QtCore.QObject):
     def checklog(self,receive):
         if receive != 1:
             error = QMessageBox.warning(self.window, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
-            self.loginFailed.emit()
         else:
             self.logSucess.emit(self.gui.username.text())
 

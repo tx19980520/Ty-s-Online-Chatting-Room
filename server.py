@@ -1,10 +1,10 @@
 import socketserver
 from time import ctime
-impoty json
+import json
 import sqlite3
 import struct
 import pickle
-from time import ctime
+from time import ctime,sleep
 BUFFSIZE = 4
 def dict_factory(cursor, row):
     d = {}
@@ -52,6 +52,9 @@ class MyServer(socketserver.BaseRequestHandler):
         f = open("chattingpicture/"+info['filename'],'wb')
         while True:
             byte = self.getDict()
+            if byte == None:
+                sleep(0.1)
+                continue
             if byte['data'] == 123:
                 f.close()
                 break
@@ -193,13 +196,6 @@ class MyServer(socketserver.BaseRequestHandler):
         print(users)
         user['NOW'] = str(len(clientlist))
         self.sendPackages(1,user)
-    def donwloadHistory(self):
-        conn = self.request
-        files = os.walk("history/")[2]:
-        tmp = {"files":files}
-        tmp = pickle.dumps(tmp)
-        l = struct.pack("i",len(tmp))
-        conn.sendall(l+tmp)
     def login(self):
         print("login")
         conn = self.request
@@ -220,7 +216,7 @@ class MyServer(socketserver.BaseRequestHandler):
         conn.sendall(returnCommand)
         return
     def handle(self):
-        self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage,"13":self.downloadHistory}
+        self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage}
         print('...connected from:'+self.client_address[0])
         Flag = True
         conn = self.request
@@ -233,5 +229,5 @@ class MyServer(socketserver.BaseRequestHandler):
 
 if __name__ == '__main__':
     print("here")
-    server = socketserver.ThreadingTCPServer(('0.0.0.0', 14333), MyServer)
+    server = socketserver.ThreadingTCPServer(('127.0.0.1', 14333), MyServer)
     server.serve_forever()

@@ -95,9 +95,6 @@ class Ui_Dialog(object):
         self.send = QtWidgets.QPushButton(self.Chatting)
         self.send.setGeometry(QtCore.QRect(700, 650, 112, 41))
         self.send.setObjectName("send")
-        self.close = QtWidgets.QPushButton(self.Chatting)
-        self.close.setGeometry(QtCore.QRect(840, 650, 112, 41))
-        self.close.setObjectName("close")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.Chatting)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(1109, 50, 171, 201))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
@@ -163,7 +160,6 @@ class Ui_Dialog(object):
         self.tabWidget.addTab(self.Files, "")
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
-        self.close.clicked.connect(Dialog.close)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -174,7 +170,6 @@ class Ui_Dialog(object):
         self.label_5.setText(_translate("Dialog", "age:"))
         self.label_4.setText(_translate("Dialog", "adrress:"))
         self.send.setText(_translate("Dialog", "send"))
-        self.close.setText(_translate("Dialog", "close"))
         self.pushButton_3.setText(_translate("Dialog", "Edit"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Chatting), _translate("Dialog", "Chatting"))
         item = self.tableWidget.horizontalHeaderItem(0)

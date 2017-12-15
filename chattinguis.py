@@ -135,7 +135,7 @@ class Ui_Chat(QtCore.QObject):
 
         self.retranslateUi()
         self.tabWidget.setCurrentIndex(0)
-        self.close.clicked.connect(self.tabWidget.close)
+        self.close.clicked.connect(self.window.close)
         QtCore.QMetaObject.connectSlotsByName(self.window)
 
     def retranslateUi(self):

@@ -25,7 +25,6 @@ class login(QtCore.QObject):
         self.window.closes.connect(self.client.Close)
         self.ui.logSucess.connect(self.enterChatting)
         self.ui.loginInfo.connect(self.client.login)
-        self.ui.loginFailed.connect(self.client.link.client.close)
         self.client.loginResult.connect(self.ui.checklog)
         self.ui.gui.register.clicked.connect(self.enterRegister)
         self.window.show()
