@@ -7,6 +7,7 @@ from change import *
 import tcpclisock
 class ChatDialog(QtWidgets.QDialog):
     needClose = QtCore.pyqtSignal()
+    needSend = QtCore.pyqtSignal()
     def __init__(self):
         super(ChatDialog,self).__init__()
     def closeEvent(self,event):
@@ -16,6 +17,9 @@ class ChatDialog(QtWidgets.QDialog):
             event.accept()
         else:
             event.ignore()
+    def keyPressEvent(self,e):
+        if e.key() == QtCore.Qt.Key_Return:
+            self.needSend.emit()
 class Chatting(QtCore.QObject):
     def __init__(self,username):
         super(Chatting,self).__init__()
@@ -30,6 +34,7 @@ class Chatting(QtCore.QObject):
         self.client.fileinfomation.connect(self.ui.setFile)
         self.ui.gui.tabWidget.currentChanged.connect(self.client.fileInfo)
         self.ui.gui.change_info.clicked.connect(self.enterChange)
+        self.window.needSend.connect(self.ui.sendMessage)
         self.ui.messagetoServer.connect(self.client.sendmessage)
         self.ui.propare.connect(self.client.downloadFile)
         self.ui.detach.connect(self.client.detach)

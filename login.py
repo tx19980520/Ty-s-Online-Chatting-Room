@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMessageBox
 from loginbackend import *
 from loginfrontend import *
 from chatting import *
-HOST = '106.15.225.249'
+HOST = '127.0.0.1'
 PORT = 14333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)

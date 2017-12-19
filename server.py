@@ -55,7 +55,7 @@ class MyServer(socketserver.BaseRequestHandler):
             if byte == None:
                 sleep(0.1)
                 continue
-            if byte['data'] == 123:
+            if byte['data'] == -1:
                 f.close()
                 break
             f.write(byte['data'])
@@ -217,7 +217,7 @@ class MyServer(socketserver.BaseRequestHandler):
         return
     def handle(self):
         self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage}
-        print('...connected from:'+self.client_address[0])
+        print('...connected from:'+self.client_address[0]+"...")
         Flag = True
         conn = self.request
         while Flag:
@@ -228,5 +228,5 @@ class MyServer(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    server = socketserver.ThreadingTCPServer(('127.0.0.1', 14333), MyServer)
+    server = socketserver.ThreadingTCPServer(('0.0.0.0', 14333), MyServer)
     server.serve_forever()

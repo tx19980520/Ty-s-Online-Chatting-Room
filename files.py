@@ -60,7 +60,7 @@ class FilePip(QtCore.QThread,tcpCliSock):
             while True:
                 tmp = f.read(BUFSIZE)
                 if not tmp:
-                    d = {'data':123}
+                    d = {'data':-1}
                     d =self.packagesHandle(d)
                     self.send(d)
                     break;
