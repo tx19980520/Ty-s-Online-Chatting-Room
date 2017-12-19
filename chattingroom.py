@@ -30,8 +30,6 @@ class Client(QtCore.QThread):
         while True:
             sleep(1)
             command = self.link.poll(self.num)
-            print(self.num)
-            print(command)
             if command == 3:
                 packages = self.link.receive_packages()
                 self.num += 1

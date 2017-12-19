@@ -21,7 +21,7 @@ class downloadButton(QtWidgets.QPushButton):
         self.setStyleSheet(''' text-align : center;                                       background-color : NavajoWhite;
                                             height : 30px;
                                             border-style: outset;
-                                           font : 17px  ''')
+                                           font : 20px  ''')
     def shot(self):
         self.shot_id.emit(self.id)
 class chattingfrontend(QtCore.QObject):
@@ -66,13 +66,23 @@ class chattingfrontend(QtCore.QObject):
     def infoDump(self,dicts):#初始化数据
         _translate =QtCore.QCoreApplication.translate
         if dicts['COMMAND']== 1:
-            self.gui.address.setText(_translate("Dialog", dicts['ADDRESS']))
             self.username = dicts['NAME']
             self.allPersons = int(dicts['PERSONS'])
             self.now = int(dicts['NOW'])
+            self.gui.address.setText(_translate("Dialog", dicts['ADDRESS']))
             self.gui.name.setText(_translate("Dialog", dicts['NAME']))
             self.gui.age.setText(_translate("Dialog", str(dicts['AGE'])))
             self.clientNow(dicts["NOW"]+'/'+dicts['PERSONS'],dicts['SPESIFIC'])
+        else:
+            error = QMessageBox.warning(self.window, "Warning","你的网络出现问题，无法查询到你的信息！",QMessageBox.Yes)
+    def newInfoDump(self,dicts):
+        _translate =QtCore.QCoreApplication.translate
+        if dicts['COMMAND']== 1:
+            self.username = dicts['NAME']
+            self.allPersons = int(dicts['PERSONS'])
+            self.gui.address.setText(_translate("Dialog", dicts['ADDRESS']))
+            self.gui.name.setText(_translate("Dialog", dicts['NAME']))
+            self.gui.age.setText(_translate("Dialog", str(dicts['AGE'])))
         else:
             error = QMessageBox.warning(self.window, "Warning","你的网络出现问题，无法查询到你的信息！",QMessageBox.Yes)
     def sendMessage(self):
@@ -114,11 +124,11 @@ class chattingfrontend(QtCore.QObject):
                 self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
                 self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
                 self.gui.tableWidget.setCellWidget(row_count,3,button)
-                line1 = self.adminmessage(line1)
-                line2 = self.adminmessage(line2)
-                self.gui.messages.insertHtml(line1)
-                self.gui.messages.insertHtml(line2)
-                return
+            line1 = self.adminmessage(line1)
+            line2 = self.adminmessage(line2)
+            self.gui.messages.insertHtml(line1)
+            self.gui.messages.insertHtml(line2)
+            return
         elif "@image:" in dicts['message']:
             filename = "message/image/"+dicts['message'][7:]
             filename = self.changeHtml(filename)
@@ -131,7 +141,7 @@ class chattingfrontend(QtCore.QObject):
             self.gui.messages.append(line1)
             self.gui.messages.append(line2)
     def normalmessage(self,s):
-        l = "<br><font size='4'>%s</font>"%(s)
+        l = "<font size='4'>%s</font>"%(s)
         return l
     def adminmessage(self,s):
         l = "<br><font size='4' color='red'>%s</font>"%(s)
@@ -160,9 +170,7 @@ class chattingfrontend(QtCore.QObject):
             self.gui.tableWidget.setCellWidget(row_count,3,button)
             m += 1
     def preparefile(self,num):
-        print (num)
         filename = self.gui.tableWidget.item(num,0).text()
-        print (filename)
         self.propare.emit(filename)
 def main():
     app = QtWidgets.QApplication(sys.argv)

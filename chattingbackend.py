@@ -6,6 +6,7 @@ from files import FilePip,FileDownload
 class Client(QtCore.QThread):
     hasNews = QtCore.pyqtSignal(dict)
     Info = QtCore.pyqtSignal(dict)
+    newInfo = QtCore.pyqtSignal(dict)
     fileinfomation = QtCore.pyqtSignal(list)
     detachlink = QtCore.pyqtSignal()
     senduploadsucess = QtCore.pyqtSignal(str)
@@ -41,33 +42,55 @@ class Client(QtCore.QThread):
             elif command == 0 or command == 8:
                 break
         self.quit()
-    def getInfo(self):
-        command = 2
-        command = self.link.commandHandle(command)
-        packages = {'username':self.username}
-        packages = pickle.dumps(packages)
-        lpackages = len(packages)
-        lpackages = struct.pack('i',lpackages)
-        self.link.send(command+lpackages+packages)
-        receive = self.link.receive_command()#返回值只可能是0或1，0表示错误，1表示正确并继续读取后续信息
-        if receive == 1:
-            info = self.link.receive_packages()
-            self.password = info['PASSWORD']
-            self.address = info['ADDRESS']
-            self.id = info['ID']
-            self.age = info['AGE']
-            self.num = info['NUM']
-            info['COMMAND'] = 1
+    def getInfo(self,c=1):
+        if c == 1:
+            command = 2
+            command = self.link.commandHandle(command)
+            packages = {'username':self.username}
+            packages = pickle.dumps(packages)
+            lpackages = len(packages)
+            lpackages = struct.pack('i',lpackages)
+            self.link.send(command+lpackages+packages)
+            receive = self.link.receive_command()#返回值只可能是0或1，0表示错误，1表示正确并继续读取后续信息
+            if receive == 1:
+                info = self.link.receive_packages()
+                self.password = info['PASSWORD']
+                self.address = info['ADDRESS']
+                self.id = info['ID']
+                self.age = info['AGE']
+                self.now = info['NOW']
+                self.num = info['NUM']
+                info['COMMAND'] = 1
+            else:
+                info = {}
+                info['COMMAND'] = 0
+            self.Info.emit(info)
         else:
-            info = {}
-            info['COMMAND'] = 0
-        self.Info.emit(info)
+            command = 2
+            command = self.link.commandHandle(command)
+            packages = {'username':self.username}
+            packages = pickle.dumps(packages)
+            lpackages = len(packages)
+            lpackages = struct.pack('i',lpackages)
+            self.link.send(command+lpackages+packages)
+            receive = self.link.receive_command()#返回值只可能是0或1，0表示错误，1表示正确并继续读取后续信息
+            if receive == 1:
+                info = self.link.receive_packages()
+                self.password = info['PASSWORD']
+                self.address = info['ADDRESS']
+                self.id = info['ID']
+                self.now = info['NOW']
+                self.age = info['AGE']
+                info['COMMAND'] = 1
+            else:
+                info = {}
+                info['COMMAND'] = 0
+            self.newInfo.emit(info)
     def fileInfo(self):
         command = 7
         command = self.link.commandHandle(command)
         self.link.send(command)
         receive = self.link.receive_packages()#反给我的是一个list里面装的是dict
-        print(receive)
         self.fileinfomation.emit(receive)
     def downloadFile(self,filename):
         self.downloadThread = FileDownload(filename)
@@ -99,9 +122,9 @@ class Client(QtCore.QThread):
         self.link.send(command+lpackages+packages)
         self.detachlink.emit()
     def userInfoChange(self,dicts):
-        command = self.link.commandHandle(10)
+        command =10
         dicts['id'] = self.id
-        packages = self.link.packagesHandle(dicts)
-        self.link.sendPackages(command,packages)
+        self.link.sendPackages(command,dicts)
         feedback = self.link.receive_command()
         self.changeresult.emit(feedback)
+        self.getInfo(c=2)

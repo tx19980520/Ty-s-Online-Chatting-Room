@@ -122,9 +122,7 @@ class MyServer(SocketServer.BaseRequestHandler):
         info = self.getDict()
         f = open("files/"+info['filename'],'rb')
         while True:
-            print "now"
             tmp = f.read(BUFFSIZE)
-            print type(tmp)
             if len(tmp)<2047:
                 dicts = {'data':tmp,'num':-2}
                 f.close()
@@ -205,7 +203,6 @@ class MyServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,'4':self.handlePoll,'5':self.FilesUpload,'6':self.FilesDownload,'7':self.fileInfo,"8":self.clientDetach,"9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage}
         print '...connected from:'+self.client_address[0]
-        print "now"
         Flag = True
         conn = self.request
         while Flag:

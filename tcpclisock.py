@@ -42,3 +42,10 @@ class tcpCliSock(object):
         command = self.commandHandle(0)
         self.send(command)
         self.client.close()
+    def sendPackages(self, command, dicts = None):
+        command = self.commandHandle(command)
+        if dicts != None:
+            dicts = self.packagesHandle(dicts)
+            self.send(command+dicts)
+        else:
+            self.send(command)

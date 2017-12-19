@@ -26,6 +26,7 @@ class Chatting(QtCore.QObject):
         self.window.needClose.connect(self.ui.closeReady)
         self.client.hasNews.connect(self.ui.showMessage)
         self.client.Info.connect(self.ui.infoDump)
+        self.client.newInfo.connect(self.ui.newInfoDump)
         self.client.fileinfomation.connect(self.ui.setFile)
         self.ui.gui.tabWidget.currentChanged.connect(self.client.fileInfo)
         self.ui.gui.change_info.clicked.connect(self.enterChange)

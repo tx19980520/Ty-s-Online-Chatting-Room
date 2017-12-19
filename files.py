@@ -11,7 +11,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 HOST = '127.0.0.1'
 PORT = 23333
-BUFSIZE = 1024
+BUFSIZE = 2048
 ADDR=(HOST,PORT)
 class FilePip(QtCore.QThread,tcpCliSock):
     hasNewFile = QtCore.pyqtSignal()
@@ -20,7 +20,6 @@ class FilePip(QtCore.QThread,tcpCliSock):
         super(FilePip,self).__init__()
         self.path = filepath
         self.special = special
-        print (special)
         path,self.filename = os.path.split(filepath)
         self.username = username
         self.size = str(os.path.getsize(filepath)/float(1024*1024))

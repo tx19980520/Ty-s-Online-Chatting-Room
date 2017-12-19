@@ -91,7 +91,10 @@ class MyServer(socketserver.BaseRequestHandler):
     def checkAnyonehere(self):
         if len(clientlist) == 0:
             global chatting
-            with open("history/"+ctime()+'.txt',"w") as f:
+            times = ctime().split(":")
+            m = "-"
+            times = m.join(times)
+            with open("history/"+times+'.txt',"w") as f:
                 for message in chatting:
                     json.dump(message,f)
             chatting = []
@@ -120,11 +123,11 @@ class MyServer(socketserver.BaseRequestHandler):
         info = self.getDict()
         f = open("chattingpicture/"+info['filename'],"rb")
         while True:
-            tmp = f.read(1024)
-            if len(tmp)<1024:
+            tmp = f.read(2048)
+            if len(tmp)<2048:
                 dicts = {'data':tmp,'num':-2}
             else:
-                dicts = {'data':tmp,'num':1024}
+                dicts = {'data':tmp,'num':2048}
             dicts = pickle.dumps(dicts)
             l = struct.pack('i',len(dicts))
             conn.sendall(l+dicts)
@@ -133,11 +136,11 @@ class MyServer(socketserver.BaseRequestHandler):
         info = self.getDict()
         f = open("files/"+info['filename'],'rb')
         while True:
-            tmp = f.read(1024)
-            if len(tmp)<1024:
+            tmp = f.read(2048)
+            if len(tmp)<2048:
                 dicts = {'data':tmp,'num':-2}
             else:
-                dicts = {'data':tmp,'num':1024}
+                dicts = {'data':tmp,'num':2048}
             dicts = pickle.dumps(dicts)
             l = struct.pack('i',len(dicts))
             conn.sendall(l+dicts)
@@ -168,7 +171,6 @@ class MyServer(socketserver.BaseRequestHandler):
     def chat(self):
          package = self.getDict()#sender and message
          package['time'] = ctime()
-         print (package)
          chatting.append(package)
     def handlePoll(self):
         package = self.getDict()
@@ -193,11 +195,9 @@ class MyServer(socketserver.BaseRequestHandler):
             user['NUM'] = len(chatting)-1
         user['PERSONS'] = str(len(users))
         user['SPESIFIC'] = clientlist
-        print(users)
         user['NOW'] = str(len(clientlist))
         self.sendPackages(1,user)
     def login(self):
-        print("login")
         conn = self.request
         data = self.getDict()
         dbconn = sqlite3.connect('user.db')
@@ -228,6 +228,5 @@ class MyServer(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    print("here")
     server = socketserver.ThreadingTCPServer(('127.0.0.1', 14333), MyServer)
     server.serve_forever()
