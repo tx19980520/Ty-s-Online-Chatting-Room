@@ -12,10 +12,10 @@ class tcpCliSock(object):
         self.client.connect(ADDR)
     def send(self,package):
         self.client.sendall(package)
-    def receive_command(self):
+    def receiveCommand(self):
         receive = self.client.recv(4)
         return struct.unpack('i',receive)[0]
-    def receive_packages(self):
+    def receivePackages(self):
         receive = self.client.recv(4)
         size = struct.unpack('i',receive)[0]
         packages = self.client.recv(size)
@@ -37,8 +37,8 @@ class tcpCliSock(object):
         packages = self.packagesHandle(packages)
         packages = command + packages
         self.send(packages)
-        return self.receive_command()
-    def Close(self):
+        return self.receiveCommand()
+    def close(self):
         command = self.commandHandle(0)
         self.send(command)
         self.client.close()

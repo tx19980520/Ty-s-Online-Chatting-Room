@@ -6,7 +6,7 @@ class Register(QtCore.QObject):
     registerRequest = QtCore.pyqtSignal(dict)
     def __init__(self,back):
         super(Register,self).__init__()
-        self.ui = registerfrontend()
+        self.ui = Registerfrontend()
         self.back = back
         self.ui.register.connect(self.back.RegistertoServer)
         self.back.feedback.connect(self.ui.registerFeedback)

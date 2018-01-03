@@ -2,7 +2,7 @@ from changeui import *
 from PyQt5 import QtCore,QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 class changefrontend(QtCore.QObject):
-    changeInfo = QtCore.pyqtSignal(dict)
+    changeinfo = QtCore.pyqtSignal(dict)
     def __init__(self,dicts):
         super(changefrontend,self).__init__()
         self.ori = dicts

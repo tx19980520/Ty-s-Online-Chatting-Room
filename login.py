@@ -8,7 +8,7 @@ HOST = '127.0.0.1'
 PORT = 14333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
-class Qmain(QtWidgets.QMainWindow):
+class Qmain(QtWidgets.QMainWindow):#主要是为了添加一个回车登陆功能
     enter = QtCore.pyqtSignal()
     closes = QtCore.pyqtSignal()
     def __init__(self):
@@ -16,33 +16,31 @@ class Qmain(QtWidgets.QMainWindow):
     def keyPressEvent(self,e):
         if e.key() == QtCore.Qt.Key_Return:
             self.enter.emit()
-class login(QtCore.QObject):
+class Login(QtCore.QObject):#为前后端的signal和slot提供连接的平台
     def __init__(self):
-        super(login,self).__init__()
+        super(Login,self).__init__()
         self.window = Qmain()
-        self.ui = loginfrontend(self.window)
-        self.client = loginbackend()
-        self.window.closes.connect(self.client.Close)
-        self.ui.logSucess.connect(self.enterChatting)
-        self.ui.loginInfo.connect(self.client.login)
-        self.client.loginResult.connect(self.ui.checklog)
+        self.ui = Loginfrontend(self.window)
+        self.client = Loginbackend()
+        self.window.closes.connect(self.client.close)
+        self.ui.logsucess.connect(self.enterChatting)
+        self.ui.logininfo.connect(self.client.login)
+        self.client.loginresult.connect(self.ui.checkLog)
         self.ui.gui.register.clicked.connect(self.enterRegister)
         self.window.show()
     def enterAnother(self):
         username = self.ui.gui.username.text()
         self.enterChatting(username)
     def enterChatting(self,username):
-        self.window.close()
-        self.client.changelink()
+        self.window.close()#关闭当前窗口
+        self.client.changeLink()#把link交给chatting
         self.chatting = Chatting(username)
-    def enterRegister(self):
+    def enterRegister(self):#开启注册窗口
         self.register = Register(self.client)
-        #self.register.registerRequest.connect(self.client.RegistertoServer)
-        #self.client.feedback.connect(self.register.ui.registerFeedback)
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    program = login()
+    program = Login()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

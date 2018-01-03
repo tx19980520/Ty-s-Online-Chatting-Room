@@ -9,11 +9,11 @@ PORT = 21567
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
 
-class loginbackend(QtCore.QObject):
-    loginResult = QtCore.pyqtSignal(int)
+class Loginbackend(QtCore.QObject):
+    loginresult = QtCore.pyqtSignal(int)
     feedback = QtCore.pyqtSignal(int)#1 is sucess ,0 is has already register
     def __init__(self):
-        super(loginbackend,self).__init__()
+        super(Loginbackend,self).__init__()
         self.link = tcp.tcpCliSock()
         self.link.link()
     def login(self,username,password):
@@ -21,18 +21,18 @@ class loginbackend(QtCore.QObject):
         data = {'username':username,'password':password}
         packages = self.link.packagesHandle(data)
         self.link.send(command+packages)
-        receive = self.link.receive_command()
-        self.loginResult.emit(receive)
-    def changelink(self):
+        receive = self.link.receiveCommand()
+        self.loginresult.emit(receive)
+    def changeLink(self):
         command = self.link.commandHandle(0)
         self.link.send(command)
-        self.link.client.close()
-    def RegistertoServer(self,dicts):
+        self.link.close()
+    def RegistertoServer(self,dicts):#发送注册的信息到服务器
         command = 9
         command =self.link.commandHandle(command)
         packages =self.link.packagesHandle(dicts)
         self.link.send(command+packages)
-        feedback = self.link.receive_command()
+        feedback = self.link.receiveCommand()#接收注册是否成功的消息并发回给前端
         self.feedback.emit(feedback)
-    def Close(self):
-        self.link.Close()
+    def close(self):
+        self.link.close()

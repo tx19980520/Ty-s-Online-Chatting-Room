@@ -15,27 +15,21 @@ from chatting import *
 from loginui import *
 from register import *
 import tcpclisock as tcp
-HOST = '106.15.225.249'
-PORT = 21567
-BUFSIZE = 1024
-ADDR=(HOST,PORT)
 
-
-class loginfrontend(QtCore.QObject):
-    loginInfo = QtCore.pyqtSignal(str,str)#向后台传输
-    logSucess = QtCore.pyqtSignal(str)#向上级传输
-    loginFailed = QtCore.pyqtSignal()
+class Loginfrontend(QtCore.QObject):
+    logininfo = QtCore.pyqtSignal(str,str)#向后台传输
+    logsucess = QtCore.pyqtSignal(str)#向上级传输
     def __init__(self,window):
-        super(loginfrontend,self).__init__()
+        super(Loginfrontend,self).__init__()
         self.window = window
         self.window.enter.connect(self.log)
         self.gui = Ui_Login(window)
         self.gui.login.clicked.connect(self.log)
-        self.gui.follow.clicked.connect(self.linkfollow)
+        self.gui.follow.clicked.connect(self.linkFollow)
         #self.gui.register.clicked.connect(self.linkregister)#在这里把部分不涉及与顶层直接有关的信号在这里做connect
-    def linkfollow(self):
+    def linkFollow(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn'))
-    def log(self):
+    def log(self):#在发送信息之前的检查
         if self.gui.username.text() == "":
             reply = QMessageBox.warning(self.window, 'Warning', '请输入昵称!', QMessageBox.Yes)
         elif self.gui.password.text() == "":
@@ -43,12 +37,12 @@ class loginfrontend(QtCore.QObject):
         else:
             username = self.gui.username.text()
             password = self.gui.password.text()
-            self.loginInfo.emit(username,password)
-    def checklog(self,receive):
+            self.logininfo.emit(username,password)
+    def checkLog(self,receive):#得到登陆结果
         if receive != 1:
             error = QMessageBox.warning(self.window, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
         else:
-            self.logSucess.emit(self.gui.username.text())
+            self.logsucess.emit(self.gui.username.text())
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

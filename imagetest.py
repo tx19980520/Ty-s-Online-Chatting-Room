@@ -11,4 +11,3 @@ def imageAdjust(s):
         y_ = int(y_)
         out = im.resize((x_, y_), Image.ANTIALIAS)
         out.save(s)
-imageAdjust("D://dulux/sb.png")

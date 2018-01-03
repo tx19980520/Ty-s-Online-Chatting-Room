@@ -14,8 +14,7 @@ PORT = 23333
 BUFSIZE = 2048
 ADDR=(HOST,PORT)
 class FilePip(QtCore.QThread,tcpCliSock):
-    hasNewFile = QtCore.pyqtSignal()
-    uploadComplete = QtCore.pyqtSignal(str)
+    uploadcomplete = QtCore.pyqtSignal(str)
     def __init__(self,filepath,username,special=0):
         super(FilePip,self).__init__()
         self.path = filepath
@@ -47,7 +46,7 @@ class FilePip(QtCore.QThread,tcpCliSock):
                 self.send(l+dicts)
                 sleep(0.1)
             f.close()
-            self.uploadComplete.emit(self.filename)
+            self.uploadcomplete.emit(self.filename)
             self.quit()
         elif self.special == 1:
             f = open(self.path,'rb')
@@ -69,7 +68,7 @@ class FilePip(QtCore.QThread,tcpCliSock):
                 self.send(d)
             self.quit()
 class FileDownload(QtCore.QThread,tcpCliSock):
-    downloadSucess = QtCore.pyqtSignal(str)
+    downloadsucess = QtCore.pyqtSignal(str)
     def __init__(self,filename='',special=0,files=None):
         super(FileDownload,self).__init__()
         self.filename = filename
@@ -93,7 +92,7 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                 f = open('download_'+self.filename,'wb')
             t = True
             while t:
-                packages = self.receive_packages()#package include data and num
+                packages = self.receivePackages()#package include data and num
                 if packages == None:
                     break
                 elif packages['num'] == -2:
@@ -105,7 +104,7 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                 self.imageAdjust("message/image/"+self.filename)
                 self.signal = True
             else:
-                self.downloadSucess.emit(self.filename)
+                self.downloadsucess.emit(self.filename)
         elif self.files != None:
             for filename in files:
                 info = {'filename':filename}
@@ -114,7 +113,7 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                 f = open('history/'+filename,'wb')
                 t = True
                 while t:
-                    packages = self.receive_packages()#package include data and num
+                    packages = self.receivePackages()#package include data and num
                     if packages == None:
                         break
                     elif packages['num'] == -2:
@@ -122,7 +121,7 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                     f.write(packages['data'])
                     sleep(0.1)
                 f.close()
-            self.downloadSucess.emit("History")
+            self.downloadsucess.emit("History")
         self.quit()
     def imageAdjust(self,s):
         im = Image.open(s)

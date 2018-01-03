@@ -1,14 +1,14 @@
 from registerui import Ui_Register
 from PyQt5 import QtCore,QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-class registerfrontend(QtCore.QObject):
-    register = QtCore.pyqtSignal(dict)
+class Registerfrontend(QtCore.QObject):
+    Register = QtCore.pyqtSignal(dict)
     def __init__(self):
         super(registerfrontend,self).__init__()
         self.window =QtWidgets.QDialog()
         self.gui = Ui_Register(self.window)
-        self.gui.start.clicked.connect(self.localcheck)
-    def localcheck(self):
+        self.gui.start.clicked.connect(self.localCheck)
+    def localCheck(self):
         if self.gui.password1.text() != self.gui.password2.text():
             error = QMessageBox.warning(self.window, "Warning", "两次密码不相同!",QMessageBox.Yes)
         elif int(self.gui.age.text()) < 0 or int(self.gui.age.text()) >150:
