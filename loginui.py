@@ -6,12 +6,16 @@ class Ui_Login(QtCore.QObject):
         self.window = window
         self.setupUi()
     def setupUi(self):
+        css =open('css.qss','r')#加载外部qss文件美化
+        str = css.readlines()
+        str =''.join(str).strip('\n')
+        QtWidgets.qApp.setStyleSheet(str)
         self.window.setObjectName("MainWindow")
         self.window.resize(600, 450)
         self.centralwidget = QtWidgets.QWidget(self.window)
         self.centralwidget.setObjectName("centralwidget")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(135, 30, 330, 90))
+        self.label.setGeometry(QtCore.QRect(70, 30, 470, 90))
         font = QtGui.QFont()
         font.setFamily("Helvetica-Condensed-Black-Se")
         font.setPointSize(20)

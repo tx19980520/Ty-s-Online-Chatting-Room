@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QAbstractItemView
 class Ui_Chat(QtCore.QObject):
     def __init__(self,window):
         super(Ui_Chat,self).__init__()
@@ -15,16 +15,16 @@ class Ui_Chat(QtCore.QObject):
         self.setupUi()
     def setupUi(self):
         self.window.setObjectName("Dialog")
-        self.window.resize(1310, 830)
+        self.window.resize(1350, 850)
         self.label = QtWidgets.QLabel(self.window)
-        self.label.setGeometry(QtCore.QRect(20, 0, 321, 61))
+        self.label.setGeometry(QtCore.QRect(20, 0, 400, 61))
         font = QtGui.QFont()
         font.setFamily("Helvetica-Condensed-Black-Se")
         font.setPointSize(20)
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.tabWidget = QtWidgets.QTabWidget(self.window)
-        self.tabWidget.setGeometry(QtCore.QRect(0, 60, 1301, 751))
+        self.tabWidget.setGeometry(QtCore.QRect(20, 60, 1291, 771))
         self.tabWidget.setObjectName("tabWidget")
         self.Chatting = QtWidgets.QWidget()
         self.Chatting.setObjectName("Chatting")
@@ -32,7 +32,7 @@ class Ui_Chat(QtCore.QObject):
         self.Edit.setGeometry(QtCore.QRect(20, 510, 931, 151))
         self.Edit.setObjectName("Edit")
         self.label_2 = QtWidgets.QLabel(self.Chatting)
-        self.label_2.setGeometry(QtCore.QRect(980, 0, 321, 51))
+        self.label_2.setGeometry(QtCore.QRect(960, 0, 321, 51))
         font = QtGui.QFont()
         font.setFamily("Helvetica-Condensed-Black-Se")
         font.setPointSize(16)
@@ -104,7 +104,7 @@ class Ui_Chat(QtCore.QObject):
         self.messages.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.messages.setObjectName("messages")
         self.users = QtWidgets.QTableWidget(self.Chatting)
-        self.users.setGeometry(QtCore.QRect(1020, 510, 251, 151))
+        self.users.setGeometry(QtCore.QRect(990, 510, 251, 151))
         self.users.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.users.setObjectName("users")
         self.users.setColumnCount(1)
@@ -113,7 +113,7 @@ class Ui_Chat(QtCore.QObject):
         self.users.setHorizontalHeaderItem(0, item)
         self.users.horizontalHeader().setDefaultSectionSize(250)
         self.photo = QtWidgets.QPushButton(self.Chatting)
-        self.photo.setGeometry(QtCore.QRect(900, 470, 51, 34))
+        self.photo.setGeometry(QtCore.QRect(900, 468, 51, 34))
         self.photo.setObjectName("pushButton")
         self.show_people = QtWidgets.QLabel(self.Chatting)
         self.show_people.setGeometry(QtCore.QRect(1050, 460, 151, 41))
@@ -124,11 +124,12 @@ class Ui_Chat(QtCore.QObject):
         self.Files = QtWidgets.QWidget()
         self.Files.setObjectName("Files")
         self.tableWidget = QtWidgets.QTableWidget(self.Files)
-        self.tableWidget.setGeometry(QtCore.QRect(30, 80, 1241, 631))
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setGeometry(QtCore.QRect(30, 80, 1228, 631))
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(4)
+        self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -138,21 +139,25 @@ class Ui_Chat(QtCore.QObject):
         self.tableWidget.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, item)
-        #self.tableWidget.horizontalHeader().setVisible(False)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
-        self.tableWidget.horizontalHeader().setDefaultSectionSize(300)
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(240)
         self.tableWidget.horizontalHeader().setHighlightSections(True)
         self.upload = QtWidgets.QPushButton(self.Files)
         self.upload.setGeometry(QtCore.QRect(1140, 20, 131, 51))
         self.upload.setObjectName("upload")
         self.tabWidget.addTab(self.Files, "")
-
         self.retranslateUi()
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(self.window)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
+        css =open('css.qss','r')#加载外部qss文件美化
+        str = css.readlines()
+        str =''.join(str).strip('\n')
+        QtWidgets.qApp.setStyleSheet(str)
         self.window.setWindowTitle(_translate("Dialog", "Dialog"))
         self.label.setText(_translate("Dialog", "Ty\'s Chatting Room"))
         self.label_2.setText(_translate("Dialog", "Your own Information"))
@@ -173,6 +178,8 @@ class Ui_Chat(QtCore.QObject):
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("Dialog", "uploaders"))
         item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("Dialog", "process"))
+        item = self.tableWidget.horizontalHeaderItem(4)
         item.setText(_translate("Dialog", "operation"))
         self.upload.setText(_translate("Dialog", "upload"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Files), _translate("Dialog", "Files"))

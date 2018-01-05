@@ -9,8 +9,9 @@ class Client(QtCore.QThread):
     newinfo = QtCore.pyqtSignal(dict)#轮询得到消息传递到前端
     fileinfomation = QtCore.pyqtSignal(list)#传进文件的消息
     senduploadsucess = QtCore.pyqtSignal(str)
-    senddonwloadsucess = QtCore.pyqtSignal(str)
+    senddownloadsucess = QtCore.pyqtSignal(str)
     changeresult = QtCore.pyqtSignal(int)
+    filedatatofront = QtCore.pyqtSignal(str,float)
     def __init__(self,link,username='',age=0,address=''):
         super(Client,self).__init__()#鉴于可能在本地就会调用到一些信息，会对发送下来的信息做保存
         self.id = 0
@@ -91,6 +92,7 @@ class Client(QtCore.QThread):
     def downloadFile(self,filename):#经过测试是可以多个文件下载的
         self.downloadThread = FileDownload(filename)
         self.downloadThread.downloadsucess.connect(self.sendDownloadSucess)
+        self.downloadThread.downloadnum.connect(self.downloadnumtoFront)
         self.downloadThread.start()
     def downloadImageMessage(self,filename):
         self.imageDownloadThread = FileDownload(filename,1)
@@ -105,7 +107,10 @@ class Client(QtCore.QThread):
     def sendUploadSucess(self,s):#一下两个信号主要是相当于再做一次封装，方便操作
         self.senduploadsucess.emit(s)
     def sendDownloadSucess(self,s):
-        self.senddonwloadsucess.emit(s)
+        self.fileInfo()
+        self.senddownloadsucess.emit(s)
+    def downloadnumtoFront(self,str,num):
+        self.filedatatofront.emit(str,num)
     def detach(self):#向服务器发送消息准备离开
         self.q= True
         sleep(1)

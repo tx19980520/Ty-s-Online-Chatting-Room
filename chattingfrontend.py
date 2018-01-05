@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'chattingroom.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.1
 #
 # WARNING! All changes made in this file will be lost!
+#在基础界面设计完成后，为了使得我们的QSS独立与文档，我们对改文件直接进行了修改，切记不要被覆盖
 import sys
+import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 import tcpclisock as tcp
 from PyQt5.QtWidgets import QMessageBox
@@ -75,10 +76,6 @@ class Downloadbutton(QtWidgets.QPushButton):
         self.id = i
         self.clicked.connect(self.shot)
         self.setText("Download")#给关闭按钮加样式
-        self.setStyleSheet(''' text-align : center;                                       background-color : NavajoWhite;
-                                            height : 30px;
-                                            border-style: outset;
-                                           font : 20px  ''')
     def shot(self):
         self.shotid.emit(self.id)
 class Chattingfrontend(QtCore.QObject):
@@ -92,6 +89,8 @@ class Chattingfrontend(QtCore.QObject):
         super(Chattingfrontend,self).__init__()
         self.buttons = []
         self.nowpeople = []
+        self.nowdownload = []
+        self.process = {}
         self.now = 0
         self.allPersons = 0
         self.window = window
@@ -112,6 +111,7 @@ class Chattingfrontend(QtCore.QObject):
         filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择上传文件（可多选）","C:/","All Files (*)")
         self.newfile.emit(filepath[0])
     def downloadSucessInfo(self,s):
+        self.nowdownload.remove(self.process[s+'id'])
         sucess =QMessageBox.about(self.window,"Sucess!","您已成功下载%s！"%(s))
     def uploadSucessInfo(self,s):
         sucess =QMessageBox.about(self.window,"Sucess!","您已成功上传%s！"%(s))
@@ -128,7 +128,9 @@ class Chattingfrontend(QtCore.QObject):
             for user in l:
                 row_count = self.gui.users.rowCount()
                 self.gui.users.insertRow(row_count)
-                self.gui.users.setItem(row_count,0,QtWidgets.QTableWidgetItem(user))
+                tmp = QtWidgets.QTableWidgetItem(user)
+                tmp.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.gui.users.setItem(row_count,0,tmp)
     def infoDump(self,dicts):#初始化数据
         _translate =QtCore.QCoreApplication.translate
         if dicts['COMMAND']== 1:
@@ -164,10 +166,8 @@ class Chattingfrontend(QtCore.QObject):
         #info['username']+" has quited the chattingroom,bye!"
         if dicts['sender'] == "administor":#一下是管理员消息的处理
             tmp = dicts['message'].split(" ")
-            print(tmp)
             if "entered" in tmp and (self.username not in tmp ) and (tmp[0] not in self.nowpeople):
                 self.nowpeople.append(tmp[0])
-                print(self.nowpeople)
                 row_count = self.gui.users.rowCount()
                 self.now += 1
                 s = str(self.now)+'/'+str(self.allPersons)
@@ -193,7 +193,7 @@ class Chattingfrontend(QtCore.QObject):
                 self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(tmp[3]))
                 self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
                 self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
-                self.gui.tableWidget.setCellWidget(row_count,3,button)
+                self.gui.tableWidget.setCellWidget(row_count,4,button)
                 line2 += 'mb'
             line1 = self.adminMessage(line1)
             line2 = self.adminMessage(line2)
@@ -223,25 +223,57 @@ class Chattingfrontend(QtCore.QObject):
     def moveCursor(self):
         self.gui.messages.moveCursor(QtGui.QTextCursor.End)
     def setFile(self,files):#对于每一次载入我们的文件页面，我们都会实时更新一下我们的文件相关数据
-        row_count = self.gui.tableWidget.rowCount()
-        if self.gui.tabWidget.currentIndex() == 0 or row_count >= len(files):
-            return
+        self.gui.tableWidget.clear()
+        row_count = row_count = self.gui.tableWidget.rowCount()
+        need = len(files)
+        while need > row_count:
+            self.gui.tableWidget.insertRow(row_count)
+            row_count += 1
         m = 0
         for f in files:
             p = m
             button = Downloadbutton(p)
             self.buttons.append(button)
             button.shotid.connect(self.prepareFile)
-            row_count = self.gui.tableWidget.rowCount()
-            self.gui.tableWidget.insertRow(row_count)
-            self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(f['FILENAME']))
-            self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(f['SIZE']))
-            self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(f['USERNAME']))
-            self.gui.tableWidget.setCellWidget(row_count,3,button)
+            t1 = QtWidgets.QTableWidgetItem(f['FILENAME'])
+            t1.setTextAlignment(QtCore.Qt.AlignCenter)
+            t2 = QtWidgets.QTableWidgetItem(f['SIZE'])
+            t2.setTextAlignment(QtCore.Qt.AlignCenter)
+            t3 = QtWidgets.QTableWidgetItem(f['USERNAME'])
+            t3.setTextAlignment(QtCore.Qt.AlignCenter)
+            if (os.path.exists("download/"+f['FILENAME']) and p not in self.nowdownload):
+                t4 = QtWidgets.QTableWidgetItem("已下载")
+                self.gui.tableWidget.setItem(p,3,t4)
+            elif p in self.nowdownload:
+                tmp = QtWidgets.QProgressBar()
+                self.process[f['FILENAME']] = tmp
+                tmp.setValue(self.process[f['FILENAME']+'num'])
+                self.gui.tableWidget.setCellWidget(p,3,tmp)
+            else:
+                t4 = QtWidgets.QTableWidgetItem("未下载")
+                self.gui.tableWidget.setItem(p,3,t4)
+            t4.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.gui.tableWidget.setItem(p,0,t1)
+            self.gui.tableWidget.setItem(p,1,t2)
+            self.gui.tableWidget.setItem(p,2,t3)
+            self.gui.tableWidget.setCellWidget(p,4,button)
             m += 1
     def prepareFile(self,num):
         filename = self.gui.tableWidget.item(num,0).text()
+        tmp = QtWidgets.QProgressBar()
+        tmp.setValue(0)
+        self.nowdownload.append(num)
+        self.gui.tableWidget.setCellWidget(num,3,tmp)
+        self.process[filename]=tmp
+        self.process[filename+'id'] = num
         self.propare.emit(filename)
+    def getDownloadProcess(self,filename,num):
+        total = float(self.gui.tableWidget.item(self.process[filename+'id'],1).text())
+        if self.gui.tabWidget.currentIndex() == 1:
+            self.process[filename+'num']=(round(100*num/total))
+            self.process[filename].setValue(self.process[filename+'num'])
+        else:
+            self.process[filename+'num'] = (round(100*num/total))
 def main():
     app = QtWidgets.QApplication(sys.argv)
     w = QtWidgets.QDialog()

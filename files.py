@@ -69,6 +69,7 @@ class FilePip(QtCore.QThread,tcpCliSock):
             self.quit()
 class FileDownload(QtCore.QThread,tcpCliSock):
     downloadsucess = QtCore.pyqtSignal(str)
+    downloadnum = QtCore.pyqtSignal(str,float)
     def __init__(self,filename='',special=0,files=None):
         super(FileDownload,self).__init__()
         self.filename = filename
@@ -89,7 +90,7 @@ class FileDownload(QtCore.QThread,tcpCliSock):
             if self.special == 1:
                 f = open("message/image/"+self.filename,"wb")
             else:
-                f = open('download_'+self.filename,'wb')
+                f = open('download/'+self.filename,'wb')
             t = True
             while t:
                 packages = self.receivePackages()#package include data and num
@@ -99,6 +100,9 @@ class FileDownload(QtCore.QThread,tcpCliSock):
                     t = False
                 f.write(packages['data'])
                 sleep(0.1)
+                fsize = os.path.getsize("download/"+self.filename)
+                fsize = fsize/float(1024*1024)
+                self.downloadnum.emit(self.filename,fsize)
             f.close()
             if self.special == 1:
                 self.imageAdjust("message/image/"+self.filename)
