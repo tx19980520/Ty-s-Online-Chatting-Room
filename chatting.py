@@ -1,15 +1,15 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets,Qt
 from PyQt5.QtWidgets import QMessageBox
 from chattingfrontend import *
 from chattingbackend import *
 from change import *
 import tcpclisock
-class ChatDialog(QtWidgets.QDialog):
+class ChatMain(QtWidgets.QMainWindow):
     needclose = QtCore.pyqtSignal()
     needsend = QtCore.pyqtSignal()
     def __init__(self):
-        super(ChatDialog,self).__init__()
+        super(ChatMain,self).__init__()
     def closeEvent(self,event):#主要是为了添加点击右上角×退出事件
         reply = QMessageBox.question(self, 'Message','Are you sure to quit?',QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
@@ -23,7 +23,8 @@ class ChatDialog(QtWidgets.QDialog):
 class Chatting(QtCore.QObject):
     def __init__(self,username):#同样是对chattingroom的前后端提供平台进行signal和slot的连接
         super(Chatting,self).__init__()
-        self.window = ChatDialog()
+        self.window = ChatMain()
+        self.window.setWindowFlags(Qt.Qt.MSWindowsFixedSizeDialogHint)
         self.tmp =tcpclisock.tcpCliSock()
         self.client = Client(self.tmp,username)
         self.ui = Chattingfrontend(self.window)

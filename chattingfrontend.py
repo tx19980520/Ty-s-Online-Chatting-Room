@@ -7,7 +7,7 @@
 #在基础界面设计完成后，为了使得我们的QSS独立与文档，我们对改文件直接进行了修改，切记不要被覆盖
 import sys
 import os
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets,Qt
 import tcpclisock as tcp
 from PyQt5.QtWidgets import QMessageBox
 from time import sleep
@@ -17,7 +17,6 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
     invisiend = QtCore.pyqtSignal()
     hide = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal()
-    quitall = QtCore.pyqtSignal()
     def __init__(self):
         super(Qtray,self).__init__()
         self.mainshow =True
@@ -31,11 +30,9 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
         self.traymenu = QtWidgets.QMenu(QtWidgets.QApplication.desktop()) #创建菜单
         self.minsize = QtWidgets.QAction('最小化 ',self,triggered=self.min)
         self.reopen = QtWidgets.QAction('还原 ', self, triggered=self.reOpen)
-        self.quitaction = QtWidgets.QAction('退出 ', self, triggered=self.quit)
         self.cloaking = QtWidgets.QAction('隐身 ',self,triggered=self.invisible)
         self.hasonline = QtWidgets.QAction('在线 ',self,triggered=self.online)
         self.traymenu.addAction(self.reopen) #为菜单添加动作
-        self.traymenu.addAction(self.quitaction)
         self.traymenu.addAction(self.cloaking)
         self.traymenu.addAction(self.hasonline)
         self.traymenu.addAction(self.minsize)
@@ -45,16 +42,15 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
             self.hide.emit()
             self.mainshow =False
     def iconClicked(self,signal):
-        if self.mainshow and (signal == 2 or signal == 3):
+        if self.mainshow and (signal == 2 ):
             self.hide.emit()
             self.mainshow = False
         else:
-            self.show.emit()#父类的显示
-            self.mainshow = True
+            self.reOpen()
     def reOpen(self):
-        pw = self.parent()
-        if pw.isVisible():
-            pw.hide()#父类的隐藏，这东西是放在window里面的
+        self.show.emit()
+        self.mainshow = True
+        self.tray.setIcon(self.icon)
     def invisible(self):
         if self.isInvisible == False:
             self.isInvisible = True
@@ -65,8 +61,8 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
             self.isInvisible = False
             self.tray.setIcon(self.icon)
             self.invisiend.emit()
-    def quit(self):
-        self.quitall.emit()
+    def hasMessage(self):
+        self.tray.setIcon(self.hasmessage)
 
 
 class Downloadbutton(QtWidgets.QPushButton):
@@ -85,6 +81,7 @@ class Chattingfrontend(QtCore.QObject):
     newfile = QtCore.pyqtSignal(str)
     newphoto = QtCore.pyqtSignal(str,int)
     messageimage = QtCore.pyqtSignal(str)
+    changeico = QtCore.pyqtSignal()
     def __init__(self,window):
         super(Chattingfrontend,self).__init__()
         self.buttons = []
@@ -103,13 +100,19 @@ class Chattingfrontend(QtCore.QObject):
         self.gui.send.clicked.connect(self.sendMessage)
         self.gui.upload.clicked.connect(self.chooseFile)
         self.gui.photo.clicked.connect(self.choosePhoto)
-        self.tr.quitall.connect(self.trayClose)
+        self.changeico.connect(self.tr.hasMessage)
     def choosePhoto(self):#选择图片
         filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择发送图片（可多选）","D:/","Image Files(*.png *.jpg *.bmp *.gif)")
-        self.newphoto.emit(filepath[0],1)
+        try:
+            self.newphoto.emit(filepath[0],1)
+        except:
+            return
     def chooseFile(self):#选择文件
         filepath,filetype = QtWidgets.QFileDialog.getOpenFileNames(self.window,"选择上传文件（可多选）","C:/","All Files (*)")
-        self.newfile.emit(filepath[0])
+        try:
+            self.newfile.emit(filepath[0])
+        except:
+            return
     def downloadSucessInfo(self,s):
         self.nowdownload.remove(self.process[s+'id'])
         sucess =QMessageBox.about(self.window,"Sucess!","您已成功下载%s！"%(s))
@@ -118,6 +121,7 @@ class Chattingfrontend(QtCore.QObject):
     def trayClose(self):
         self.closeReady()
         self.window.hide()
+        self.tr.tray.hide()
     def closeReady(self):
         self.detach.emit()
     def clientNow(self,text,l=None):#右下角显示现有的人数
@@ -196,7 +200,7 @@ class Chattingfrontend(QtCore.QObject):
                 self.gui.tableWidget.setCellWidget(row_count,4,button)
                 line2 += 'mb'
             line1 = self.adminMessage(line1)
-            line2 = self.adminMessage(line2)
+            line2 = self.adminMessage(line2,2)
             self.gui.messages.insertHtml(line1)
             self.gui.messages.insertHtml(line2)
             return
@@ -207,15 +211,23 @@ class Chattingfrontend(QtCore.QObject):
             self.gui.messages.insertHtml(filename)
             return
         else:
+            if self.username !=dicts['sender']:
+                self.changeico.emit()
             line1 = self.normalMessage(line1)
-            line2 = self.normalMessage(line2)
+            line2 = self.normalMessage(line2,2)
             self.gui.messages.append(line1)
             self.gui.messages.append(line2)
-    def normalMessage(self,s):
-        l = "<font size='4'>%s</font>"%(s)
+    def normalMessage(self,s,num=1):
+        if num == 1:
+            l = "<span style='font-weight:bold;'><font size='4'>%s</font></span>"%(s)
+        else:
+            l = "<font size='4'>%s</font>"%(s)
         return l
-    def adminMessage(self,s):#由于我们的展示的是使用的QTextBrowser,他是支持HTML格式的，下同
-        l = "<br><font size='4' color='red'>%s</font>" % (s)
+    def adminMessage(self,s,num=1):#由于我们的展示的是使用的QTextBrowser,他是支持HTML格式的，上同
+        if num == 1:
+            l = "<br><span style='font-weight:bold;'><font size='4' color='red'>%s</font></span>" % (s)
+        else:
+            l = "<br><font size='4' color='red'>%s</font>" % (s)
         return l
     def changeHtml(self,filename):
         s = "<br><img src=\"%s\">" % (filename)

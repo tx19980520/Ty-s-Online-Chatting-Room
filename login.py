@@ -8,18 +8,19 @@ HOST = '127.0.0.1'
 PORT = 14333
 BUFSIZE = 1024
 ADDR=(HOST,PORT)
-class Qmain(QtWidgets.QMainWindow):#主要是为了添加一个回车登陆功能
+class logQmain(QtWidgets.QMainWindow):#主要是为了添加一个回车登陆功能
     enter = QtCore.pyqtSignal()
     closes = QtCore.pyqtSignal()
     def __init__(self):
-        super(Qmain,self).__init__()
+        super(logQmain,self).__init__()
     def keyPressEvent(self,e):
         if e.key() == QtCore.Qt.Key_Return:
             self.enter.emit()
 class Login(QtCore.QObject):#为前后端的signal和slot提供连接的平台
     def __init__(self):
         super(Login,self).__init__()
-        self.window = Qmain()
+        self.window = logQmain()
+        self.window.setWindowFlags(Qt.Qt.MSWindowsFixedSizeDialogHint)
         self.ui = Loginfrontend(self.window)
         self.client = Loginbackend()
         self.window.closes.connect(self.client.close)

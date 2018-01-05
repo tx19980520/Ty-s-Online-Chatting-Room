@@ -107,8 +107,8 @@ class Client(QtCore.QThread):
     def sendUploadSucess(self,s):#一下两个信号主要是相当于再做一次封装，方便操作
         self.senduploadsucess.emit(s)
     def sendDownloadSucess(self,s):
-        self.fileInfo()
         self.senddownloadsucess.emit(s)
+        self.fileInfo()
     def downloadnumtoFront(self,str,num):
         self.filedatatofront.emit(str,num)
     def detach(self):#向服务器发送消息准备离开
