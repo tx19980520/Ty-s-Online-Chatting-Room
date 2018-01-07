@@ -32,6 +32,9 @@ class Ui_Login(QtCore.QObject):
         self.password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(90, 150, 100, 30))
+        self.isvisi = QtWidgets.QRadioButton(self.centralwidget)
+        self.isvisi.setGeometry(QtCore.QRect(420, 270, 151, 51))
+        self.isvisi.setObjectName("isvisi")
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(10)
@@ -73,10 +76,11 @@ class Ui_Login(QtCore.QObject):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.window.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.window.setWindowTitle(_translate("MainWindow", "login"))
         self.label.setText(_translate("MainWindow", "Ty\'s Online Chatting Room"))
         self.label_2.setText(_translate("MainWindow", "昵称"))
         self.label_3.setText(_translate("MainWindow", "密码"))
         self.register.setText(_translate("MainWindow", "注册账号"))
         self.follow.setText(_translate("MainWindow", "关注我"))
         self.login.setText(_translate("MainWindow", "登陆"))
+        self.isvisi.setText(_translate("MainWindow", "隐身登陆"))

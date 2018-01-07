@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets,Qt
 
 class Ui_Change(QtCore.QObject):
     def __init__(self,window):
@@ -14,6 +14,10 @@ class Ui_Change(QtCore.QObject):
         self.window = window
         self.setupUi()
     def setupUi(self):
+        css =open('css.qss','r')#加载外部qss文件美化
+        str = css.readlines()
+        str =''.join(str).strip('\n')
+        QtWidgets.qApp.setStyleSheet(str)
         self.window.setObjectName("Dialog")
         self.window.resize(800, 600)
         self.label = QtWidgets.QLabel(self.window)
@@ -91,7 +95,7 @@ class Ui_Change(QtCore.QObject):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.window.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.window.setWindowTitle(_translate("Dialog", "ChangeInfo"))
         self.label.setText(_translate("Dialog", "Change Infomation"))
         self.change.setText(_translate("Dialog", "Change"))
         self.label_3.setText(_translate("Dialog", "password1"))

@@ -19,6 +19,7 @@ import tcpclisock as tcp
 class Loginfrontend(QtCore.QObject):
     logininfo = QtCore.pyqtSignal(str,str)#向后台传输
     logsucess = QtCore.pyqtSignal(str)#向上级传输
+    wannainvisible =QtCore.pyqtSignal(bool)#向login传输我们的登陆状态
     def __init__(self,window):
         super(Loginfrontend,self).__init__()
         self.window = window
@@ -26,7 +27,10 @@ class Loginfrontend(QtCore.QObject):
         self.gui = Ui_Login(window)
         self.gui.login.clicked.connect(self.log)
         self.gui.follow.clicked.connect(self.linkFollow)
+        self.gui.isvisi.toggled.connect(self.checkinvisible)
         #self.gui.register.clicked.connect(self.linkregister)#在这里把部分不涉及与顶层直接有关的信号在这里做connect
+    def checkinvisible(self,value):
+        self.wannainvisible.emit(value)
     def linkFollow(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl('http://www.cqdulux.cn'))
     def log(self):#在发送信息之前的检查
@@ -40,7 +44,10 @@ class Loginfrontend(QtCore.QObject):
             self.logininfo.emit(username,password)
     def checkLog(self,receive):#得到登陆结果
         if receive != 1:
-            error = QMessageBox.warning(self.window, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
+            if receive == 0:
+                error = QMessageBox.warning(self.window, "Warning", "用户不存在或用户名、密码不正确!",QMessageBox.Yes)
+            if receive == 2:
+                error = QMessageBox.warning(self.window, "Warning", "该用户已在其他地方登陆，请先退出其他登陆!",QMessageBox.Yes)
         else:
             self.logsucess.emit(self.gui.username.text())
 

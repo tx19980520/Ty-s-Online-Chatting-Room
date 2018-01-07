@@ -88,7 +88,12 @@ class Client(QtCore.QThread):
         command = self.connection.commandHandle(command)
         self.connection.send(command)
         receive = self.connection.receivePackages()#反给我的是一个list里面装的是dict
-        self.fileinfomation.emit(receive)
+        try:
+            self.fileinfomation.emit(receive)
+        except TypeError:
+            while receive == None:
+                receive = self.connection.receivePackages()
+            self.fileinfomation.emit(receive)
     def downloadFile(self,filename):#经过测试是可以多个文件下载的
         self.downloadThread = FileDownload(filename)
         self.downloadThread.downloadsucess.connect(self.sendDownloadSucess)

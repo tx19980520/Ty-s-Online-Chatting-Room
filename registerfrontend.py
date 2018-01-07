@@ -2,9 +2,9 @@ from registerui import Ui_Register
 from PyQt5 import QtCore,QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 class Registerfrontend(QtCore.QObject):
-    Register = QtCore.pyqtSignal(dict)
+    register = QtCore.pyqtSignal(dict)
     def __init__(self):
-        super(registerfrontend,self).__init__()
+        super(Registerfrontend,self).__init__()
         self.window =QtWidgets.QDialog()
         self.gui = Ui_Register(self.window)
         self.gui.start.clicked.connect(self.localCheck)

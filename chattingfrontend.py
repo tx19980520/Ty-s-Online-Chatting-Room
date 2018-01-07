@@ -17,15 +17,20 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
     invisiend = QtCore.pyqtSignal()
     hide = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal()
-    def __init__(self):
+    def __init__(self,username,state):
         super(Qtray,self).__init__()
-        self.mainshow =True
-        self.isInvisible = False;
+        self.mainshow =True#记录现在窗口的情况
+        self.username = username
+        self.isInvisible = state#预先设定好的，影响到是不是隐身登陆
         self.tray = QtWidgets.QSystemTrayIcon()
         self.icon = QtGui.QIcon("systempic/ico.ico")
         self.hasmessage = QtGui.QIcon("systempic/hasmessage.ico")
         self.invisibleicon = QtGui.QIcon("systempic/invisible.ico")
-        self.tray.setIcon(self.icon)  #设置系统托盘图标
+        self.tray.setToolTip("用户名：%s \n状态：在线 "%(self.username))
+        if self.isInvisible:
+            self.tray.setIcon(self.invisibleicon)
+        else:
+            self.tray.setIcon(self.icon)  #设置系统托盘图标
         self.tray.activated.connect(self.iconClicked) #设置托盘点击事件处理函数
         self.traymenu = QtWidgets.QMenu(QtWidgets.QApplication.desktop()) #创建菜单
         self.minsize = QtWidgets.QAction('最小化 ',self,triggered=self.min)
@@ -41,28 +46,31 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
         if self.mainshow:
             self.hide.emit()
             self.mainshow =False
-    def iconClicked(self,signal):
+    def iconClicked(self,signal):#点击icon事件
         if self.mainshow and (signal == 2 ):
             self.hide.emit()
             self.mainshow = False
         else:
             self.reOpen()
-    def reOpen(self):
+    def reOpen(self):#打开我们的窗口
         self.show.emit()
         self.mainshow = True
         self.tray.setIcon(self.icon)
-    def invisible(self):
+    def invisible(self):#隐身模式切换
         if self.isInvisible == False:
             self.isInvisible = True
             self.tray.setIcon(self.invisibleicon)
+            self.tray.setToolTip("用户名：%s \n状态：隐身 "%(self.username))
             self.invisistart.emit()
-    def online(self):
+    def online(self):#在线模式切换
         if self.isInvisible == True:
             self.isInvisible = False
             self.tray.setIcon(self.icon)
+            self.tray.setToolTip("用户名：%s \n状态：在线 "%(self.username))
             self.invisiend.emit()
-    def hasMessage(self):
-        self.tray.setIcon(self.hasmessage)
+    def hasMessage(self):#有消息的时候如果是最小的化的情况，需要改变icon
+        if not self.mainshow:
+            self.tray.setIcon(self.hasmessage)
 
 
 class Downloadbutton(QtWidgets.QPushButton):
@@ -82,7 +90,7 @@ class Chattingfrontend(QtCore.QObject):
     newphoto = QtCore.pyqtSignal(str,int)
     messageimage = QtCore.pyqtSignal(str)
     changeico = QtCore.pyqtSignal()
-    def __init__(self,window):
+    def __init__(self,window,username,state):
         super(Chattingfrontend,self).__init__()
         self.buttons = []
         self.nowpeople = []
@@ -92,7 +100,7 @@ class Chattingfrontend(QtCore.QObject):
         self.allPersons = 0
         self.window = window
         self.username = ''
-        self.tr = Qtray()
+        self.tr = Qtray(username,state)
         self.tr.tray.show()
         #gui信号连接
         self.gui = Ui_Chat(window)
@@ -122,7 +130,7 @@ class Chattingfrontend(QtCore.QObject):
         self.closeReady()
         self.window.hide()
         self.tr.tray.hide()
-    def closeReady(self):
+    def closeReady(self):#对于关闭的一个简单的封装
         self.detach.emit()
     def clientNow(self,text,l=None):#右下角显示现有的人数
         _translate =QtCore.QCoreApplication.translate
@@ -179,7 +187,7 @@ class Chattingfrontend(QtCore.QObject):
                 self.gui.users.insertRow(row_count)
                 self.gui.users.setItem(row_count,0,QtWidgets.QTableWidgetItem(tmp[0]))
             elif "quited" in tmp and (self.username not in tmp )and (tmp[0] in self.nowpeople):#用户退出，去掉其在用户列表中的那一行
-                row_count = self.gui.users.rowCount()
+                row_count = self.gui.users.rowCount()#有人退出
                 for i in range(row_count+1):
                     if self.gui.users.item(i,0).text() == tmp[0]:
                         self.gui.users.removeRow(i)
@@ -188,15 +196,24 @@ class Chattingfrontend(QtCore.QObject):
                 self.now -= 1
                 s = str(self.now)+'/'+str(self.allPersons)
                 self.clientNow(s)
-            elif "uploaded" in tmp:
+            elif "uploaded" in tmp:#有新文件被上传
                 row_count = self.gui.tableWidget.rowCount()
                 self.gui.tableWidget.insertRow(row_count)
                 button = Downloadbutton(row_count)
                 self.buttons.append(button)
                 button.shotid.connect(self.prepareFile)
-                self.gui.tableWidget.setItem(row_count,0,QtWidgets.QTableWidgetItem(tmp[3]))
-                self.gui.tableWidget.setItem(row_count,1,QtWidgets.QTableWidgetItem(tmp[-1]))
-                self.gui.tableWidget.setItem(row_count,2,QtWidgets.QTableWidgetItem(tmp[0]))
+                t1 = QtWidgets.QTableWidgetItem(tmp[3])
+                t2 = QtWidgets.QTableWidgetItem(tmp[-1])
+                t3 = QtWidgets.QTableWidgetItem(tmp[0])
+                t4 = QtWidgets.QTableWidgetItem("未下载")
+                t1.setTextAlignment(QtCore.Qt.AlignCenter)
+                t2.setTextAlignment(QtCore.Qt.AlignCenter)
+                t3.setTextAlignment(QtCore.Qt.AlignCenter)
+                t4.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.gui.tableWidget.setItem(row_count,0,t1)
+                self.gui.tableWidget.setItem(row_count,1,t2)
+                self.gui.tableWidget.setItem(row_count,2,t3)
+                self.gui.tableWidget.setItem(row_count,3,t4)
                 self.gui.tableWidget.setCellWidget(row_count,4,button)
                 line2 += 'mb'
             line1 = self.adminMessage(line1)
@@ -204,7 +221,7 @@ class Chattingfrontend(QtCore.QObject):
             self.gui.messages.insertHtml(line1)
             self.gui.messages.insertHtml(line2)
             return
-        elif "@image:" in dicts['message']:
+        elif "@image:" in dicts['message']:#需要下载图片
             filename = "message/image/"+dicts['message'][7:]
             filename = self.changeHtml(filename)
             self.gui.messages.append(line1)
@@ -213,6 +230,8 @@ class Chattingfrontend(QtCore.QObject):
         else:
             if self.username !=dicts['sender']:
                 self.changeico.emit()
+                self.window.raise_()
+                self.window.activateWindow()
             line1 = self.normalMessage(line1)
             line2 = self.normalMessage(line2,2)
             self.gui.messages.append(line1)

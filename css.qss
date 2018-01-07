@@ -12,12 +12,12 @@ QPushButton:hover:pressed{
         background:qlineargradient(spread:pad, x1:0.460227, y1:0, x2:0.465818, y2:0.875, stop:0 rgba(170, 255, 255, 255), stop:1 rgba(255, 255, 255, 255));
 }
 QMainWindow,QStackedWidget, QLabel, QPushButton, QRadioButton, QCheckBox,
-QGroupBox, QStatusBar, QToolButton, QComboBox, QDialog {
+QGroupBox, QStatusBar, QToolButton, QComboBox, QDialog,QRadioButton,QSpinBox {
     background-color: #222222;
     color: #BBBBBB;
     font-family: "Segoe UI";
 }
-QPushButton{
+QPushButton,QRadioButton{
   font: bold;
 }
 QPlainTextEdit{

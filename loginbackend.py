@@ -15,10 +15,11 @@ class Loginbackend(QtCore.QObject):
     def __init__(self):
         super(Loginbackend,self).__init__()
         self.link = tcp.tcpCliSock()
+        self.userstate = False;
         self.link.link()
     def login(self,username,password):
         command = self.link.commandHandle(1)
-        data = {'username':username,'password':password}
+        data = {'username':username,'password':password,'state':self.userstate}
         packages = self.link.packagesHandle(data)
         self.link.send(command+packages)
         receive = self.link.receiveCommand()

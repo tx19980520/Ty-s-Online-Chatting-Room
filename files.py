@@ -29,9 +29,9 @@ class FilePip(QtCore.QThread,tcpCliSock):
             command = 5
             command = struct.pack('i',command)
             self.send(command)
-            simpleInfo = {'username':self.username,'filename':self.filename,'size':self.size}
-            simpleInfo = self.packagesHandle(simpleInfo)
-            self.send(simpleInfo)
+            simpleinfo = {'username':self.username,'filename':self.filename,'size':self.size}
+            simpleinfo = self.packagesHandle(simpleinfo)
+            self.send(simpleinfo)
             f = open(self.path,'rb')
             t=True
             while t:
@@ -53,9 +53,9 @@ class FilePip(QtCore.QThread,tcpCliSock):
             command = 11
             command = struct.pack('i',command)
             self.send(command)
-            simpleInfo = {'username':self.username,'filename':self.filename,'size':self.size}
-            simpleInfo = self.packagesHandle(simpleInfo)
-            self.send(simpleInfo)
+            simpleinfo = {'username':self.username,'filename':self.filename,'size':self.size}
+            simpleinfo = self.packagesHandle(simpleinfo)
+            self.send(simpleinfo)
             while True:
                 tmp = f.read(BUFSIZE)
                 if not tmp:
@@ -95,14 +95,16 @@ class FileDownload(QtCore.QThread,tcpCliSock):
             while t:
                 packages = self.receivePackages()#package include data and num
                 if packages == None:
-                    break
+                    sleep(0.2)
+                    continue
                 elif packages['num'] == -2:
                     t = False
                 f.write(packages['data'])
                 sleep(0.1)
-                fsize = os.path.getsize("download/"+self.filename)
-                fsize = fsize/float(1024*1024)
-                self.downloadnum.emit(self.filename,fsize)
+                if self.special != 1:
+                    fsize = os.path.getsize("download/"+self.filename)
+                    fsize = fsize/float(1024*1024)
+                    self.downloadnum.emit(self.filename,fsize)
             f.close()
             if self.special == 1:
                 self.imageAdjust("message/image/"+self.filename)

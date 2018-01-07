@@ -5,6 +5,7 @@ import sqlite3
 import struct
 import pickle
 from time import ctime,sleep
+from random import randint
 BUFFSIZE = 4
 def dict_factory(cursor, row):
     d = {}
@@ -24,15 +25,19 @@ class MyServer(socketserver.BaseRequestHandler):
     def command(self):
         conn = self.request
         receive = conn.recv(4)
-        command = struct.unpack('i',receive)[0]
-        self.business[str(command)]()
-        return command
+        try:
+            command = struct.unpack('i',receive)[0]
+            self.business[str(command)]()
+        except:#可能有人只是打开了登陆页面但是后来直接关掉这个时候就会出现struct.error我们对其进行处理，直接断开链接
+            return 0
+        else:
+            return command
     def receiveDict(self,size):
         conn = self.request
         receive = conn.recv(size)
         dicts = pickle.loads(receive)
         return dicts;
-    def getDict(self):
+    def getDict(self):#收到指令后接受信息的最顶层封装
         try:
             return self.receiveDict(self.receiveSize())
         except:
@@ -46,8 +51,8 @@ class MyServer(socketserver.BaseRequestHandler):
             conn.sendall(command+size+dicts)
         else:
             conn.sendall(command)
-    #上述都是为了封装好用
-    def photomessage(self):
+    #############上述都是为了封装好用###############
+    def photoMessage(self):
         conn = self.request
         info = self.getDict()
         f = open("chattingpicture/"+info['filename'],'wb')
@@ -65,22 +70,26 @@ class MyServer(socketserver.BaseRequestHandler):
         m['time'] = ctime()
         m["message"] = "@image:"+info['filename']
         chatting.append(m)
-    def userUpdate(self):
+    def userUpdate(self):#用户修改个人信息
         conn = self.request
         update = self.getDict()
         dbconn = sqlite3.connect("user.db")
-        cursor = dbconn.cursor()
+        cursor = dbconn.cursor()#我们在该处是使用primary key id寻找的，因而改名可以实现，但是我们得对名字查重
+        cursor.execute("select id from USERS where name = \'"+update['name']+"\'")
+        result = cursor.fetchall()
+        if result:
+            self.sendPackages(2)
         cursor.execute("UPDATE USERS SET NAME=\'"+update['name']+"\',PASSWORD=\'"+update['password']+"\',ADDRESS=\'"+update['address']+"\',AGE=\'"+update['age']+"\' WHERE ID="+str(update['id']))
         dbconn.commit()
         self.sendPackages(1)
-    def dbRegister(self):
+    def dbRegister(self):#新user的服务器注册
         conn = self.request
         info = self.getDict()
         dbconn = sqlite3.connect('user.db')
         cursor = dbconn.cursor()
         cursor.execute("select id from USERS where name = \'"+info['name']+"\'")
         result = cursor.fetchall()
-        if result:
+        if result:#这个地方先找一边防止昵称存在两个相同的
             self.sendPackages(2)
         else:
             cursor.execute("INSERT INTO USERS (NAME,AGE,ADDRESS,PASSWORD) VALUES (\'"+info['name']+"\',\'"+info['age']+"\',\'"+info['address']+"\',\'"+info['password']+"\')")
@@ -89,11 +98,12 @@ class MyServer(socketserver.BaseRequestHandler):
             self.sendPackages(1)
     def logDetach(self):
         return 0
-    def checkAnyonehere(self):
+    def checkAnyonehere(self):#服务器上提供收集history的服务，在每次聊天室没人的时候进行history的保存
+    #对这个部分的开发比较少，暂时是把history以json的格式保存在文件中，这样以后对这个部分的开发也比较方便
         if len(clientlist) == 0:
             global chatting
             times = ctime().split(":")
-            m = "-"
+            m = "-"#这个地方修改了格式，
             times = m.join(times)
             with open("history/"+times+'.txt',"w") as f:
                 for message in chatting:
@@ -109,6 +119,7 @@ class MyServer(socketserver.BaseRequestHandler):
                 del clientlist[i]
                 break
         self.checkAnyonehere()
+        #下述是两个状态的改变
     def invisiState(self):
         conn = self.request
         info =self.getDict()
@@ -123,12 +134,13 @@ class MyServer(socketserver.BaseRequestHandler):
         invisiblelist.remove(info['username'])
         hello = {"sender":"administor","message":info['username']+" has entered the chattingroom!",'time':ctime()}
         chatting.append(hello)
+        #向客户端更新当前的文件消息
     def fileInfo(self):
         conn = self.request
         dbconn = sqlite3.connect('user.db')
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
-        cursor.execute("select* from FILES")
+        cursor.execute("SELECT* FROM FILES")
         files = cursor.fetchall()
         files = pickle.dumps(files)
         l = struct.pack('i',len(files))
@@ -162,19 +174,27 @@ class MyServer(socketserver.BaseRequestHandler):
         f.close()
     def filesUpload(self):
         info = self.getDict()
-        f = open("files/"+info['filename'],'wb')
+        dbconn = sqlite3.connect('user.db')
+        dbconn.row_factory = dict_factory
+        cursor = dbconn.cursor()
+        cursor.execute("SELECT * FROM FILES WHERE FILENAME="+"\'%s\'"%(info['filename']))
+        result = cursor.fetchall()
+        while result:
+            tmp = randint(1,100)
+            cursor.execute("SELECT * FROM FILES WHERE FILENAME="+"\'%s\'"%(info['filename']+'('+str(tmp)+")"))
+            result = cursor.fetchall()
+        f = open("files/"+info['filename']+"("+str(tmp)+")",'wb')
         t= True
         while t:
             byte = self.getDict()
             if byte == None:
-                break
+                sleep(0.3)
+                continue
             elif byte['num'] == -2:
                 t = False
             f.write(byte['data'])
         f.close()
-        dbconn = sqlite3.connect('user.db')
-        dbconn.row_factory = dict_factory
-        cursor = dbconn.cursor()
+        info['filename'] = info['filename']+'('+str(tmp)+")"
         cursor.execute("INSERT INTO FILES (FILENAME,SIZE,USERNAME) VALUES ("+"\'"+info['filename']+"\',\'"+info['size']+"\',\'"+info['username']+"\')")
         dbconn.commit()
         dbconn.close()
@@ -219,31 +239,38 @@ class MyServer(socketserver.BaseRequestHandler):
         dbconn.row_factory = dict_factory
         cursor = dbconn.cursor()
         cursor.execute("SELECT * from users  where name = "+"\'"+data['username']+"\'")
-        user = cursor.fetchall()[0]
+        try:#如果数据库根本就没有人，则我们下述语句会出现IndexError，对此进行异常处理
+            user = cursor.fetchall()[0]
+        except IndexError:
+            returnCommand = struct.pack('i',0)
+            conn.sendall(returnCommand)
+            return
+        if data['username'] in clientlist:
+            returnCommand = struct.pack('i',2)
+            conn.sendall(returnCommand)
+            return
         if user['PASSWORD'] == data['password']:
             returnCommand =struct.pack('i',1)
             conn.sendall(returnCommand)
-            clientlist.append(data['username'])
-            hello = {"sender":"administor","message":data['username']+" has entered the chattingroom!",'time':ctime()}
-            chatting.append(hello)
+            print(data['state'])
+            if data['state']:#如果是隐身登陆
+                invisiblelist.append(data['username'])
+            else:
+                clientlist.append(data['username'])
+                hello = {"sender":"administor","message":data['username']+" has entered the chattingroom!",'time':ctime()}
+                chatting.append(hello)
             return
-        returnCommand = struct.pack('i',0)
-        conn.sendall(returnCommand)
-        return
     def handle(self):
         self.business= {'0':self.logDetach,'1':self.login,'2':self.info,'3':self.chat,\
         '4':self.handlePoll,'5':self.filesUpload,'6':self.filesDownload,'7':self.fileInfo,"8":self.clientDetach,\
-        "9":self.dbRegister,"10":self.userUpdate,"11":self.photomessage,"12":self.askImage,'13':self.invisiState,"14":self.onlineState}
+        "9":self.dbRegister,"10":self.userUpdate,"11":self.photoMessage,"12":self.askImage,'13':self.invisiState,"14":self.onlineState}
         print('...connected from:'+self.client_address[0]+"...")
         Flag = True
         conn = self.request
         while Flag:
-            try:
-                cmd = self.command()
-                if cmd == 8 or cmd == 0:
-                    break;
-            except ConnectionResetError:
-                pass
+            cmd = self.command()
+            if cmd == 8 or cmd == 0:
+                break;
 
 
 if __name__ == '__main__':

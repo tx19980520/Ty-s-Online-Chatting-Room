@@ -21,13 +21,13 @@ class ChatMain(QtWidgets.QMainWindow):
         if e.key() == QtCore.Qt.Key_Return:
             self.needsend.emit()
 class Chatting(QtCore.QObject):
-    def __init__(self,username):#同样是对chattingroom的前后端提供平台进行signal和slot的连接
+    def __init__(self,username,state):#同样是对chattingroom的前后端提供平台进行signal和slot的连接
         super(Chatting,self).__init__()
         self.window = ChatMain()
         self.window.setWindowFlags(Qt.Qt.MSWindowsFixedSizeDialogHint)
         self.tmp =tcpclisock.tcpCliSock()
         self.client = Client(self.tmp,username)
-        self.ui = Chattingfrontend(self.window)
+        self.ui = Chattingfrontend(self.window,username,state)
         self.window.needclose.connect(self.ui.closeReady)
         self.client.hasnews.connect(self.ui.showMessage)
         self.client.info.connect(self.ui.infoDump)
