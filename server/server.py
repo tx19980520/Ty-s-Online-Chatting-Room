@@ -77,8 +77,9 @@ class MyServer(socketserver.BaseRequestHandler):
         cursor = dbconn.cursor()#我们在该处是使用primary key id寻找的，因而改名可以实现，但是我们得对名字查重
         cursor.execute("select id from USERS where name = \'"+update['name']+"\'")
         result = cursor.fetchall()
-        if result:
+        if result[0][0] != update['id']:
             self.sendPackages(2)
+            return
         cursor.execute("UPDATE USERS SET NAME=\'"+update['name']+"\',PASSWORD=\'"+update['password']+"\',ADDRESS=\'"+update['address']+"\',AGE=\'"+update['age']+"\' WHERE ID="+str(update['id']))
         dbconn.commit()
         self.sendPackages(1)
@@ -179,22 +180,25 @@ class MyServer(socketserver.BaseRequestHandler):
         cursor = dbconn.cursor()
         cursor.execute("SELECT * FROM FILES WHERE FILENAME="+"\'%s\'"%(info['filename']))
         result = cursor.fetchall()
-        while result:
+        while result!=[]:
             tmp = randint(1,100)
-            cursor.execute("SELECT * FROM FILES WHERE FILENAME="+"\'%s\'"%(info['filename']+'('+str(tmp)+")"))
+            cursor.execute("SELECT * FROM FILES WHERE FILENAME="+"\'%s\'"%('('+str(tmp)+")"+info['filename']))
             result = cursor.fetchall()
-        f = open("files/"+info['filename']+"("+str(tmp)+")",'wb')
+            info['filename'] = '('+str(tmp)+")"+info['filename']
+        f = open("files/"+info['filename'],'wb')
+        print(result)
         t= True
         while t:
             byte = self.getDict()
+            print("byte!")
             if byte == None:
-                sleep(0.3)
+                sleep(0.1)
                 continue
             elif byte['num'] == -2:
                 t = False
             f.write(byte['data'])
         f.close()
-        info['filename'] = info['filename']+'('+str(tmp)+")"
+        info['filename']
         cursor.execute("INSERT INTO FILES (FILENAME,SIZE,USERNAME) VALUES ("+"\'"+info['filename']+"\',\'"+info['size']+"\',\'"+info['username']+"\')")
         dbconn.commit()
         dbconn.close()
@@ -252,7 +256,6 @@ class MyServer(socketserver.BaseRequestHandler):
         if user['PASSWORD'] == data['password']:
             returnCommand =struct.pack('i',1)
             conn.sendall(returnCommand)
-            print(data['state'])
             if data['state']:#如果是隐身登陆
                 invisiblelist.append(data['username'])
             else:

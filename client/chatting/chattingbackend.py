@@ -37,7 +37,7 @@ class Client(QtCore.QThread):
                 if "@image:" in packages['message']:#通知有图片消息
                     self.downloadImageMessage(packages["message"][7:])#启发下载图片，另开线程
                     while not self.imageDownloadThread.signal:
-                        sleep(0.2)
+                        sleep(1)
                 self.hasnews.emit(packages)
             elif command == 0 or command == 8:
                 break
@@ -74,7 +74,8 @@ class Client(QtCore.QThread):
             self.id = info['ID']
             self.age = info['AGE']
             self.now = info['NOW']
-            self.num = info['NUM']
+            if model == 1:
+                self.num = info['NUM']
             info['COMMAND'] = 1
         else:
             info = {}

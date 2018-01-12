@@ -1,0 +1,1 @@
+{"time": "Fri Jan 12 04:01:58 2018", "message": "suyi has entered the chattingroom!", "sender": "administor"}{"time": "Fri Jan 12 04:02:10 2018", "message": "123", "sender": "suyi"}{"time": "Fri Jan 12 04:02:22 2018", "message": "suyi has quited the chattingroom, bye!", "sender": "administor"}

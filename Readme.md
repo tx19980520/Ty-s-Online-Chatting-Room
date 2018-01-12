@@ -1,7 +1,3 @@
----
-typora-copy-images-to: ./
----
-
 # CS902大作业汇报——Ty's chatting room
 
 ![sysico](report/sysico.png)
@@ -18,14 +14,14 @@ typora-copy-images-to: ./
 
 该项目的主要用到的语言为python，附加QSS作为专属的Qt的美化方式，用到的主要库为：
 
-- PyQt5，主要用于实现我们的友好界面
+- PyQt5：主要用于实现我们的友好界面
 - socketserver：用于服务器的实现
 - sqlite3：用于操作sqlite数据库
-- struct，pickle用于服务器和客户端的数据传输处理
-- json 用于处理历史消息的文件存储
-- os，主要用于对文件的一些处理和查询
-- re，正则从文字中得到一些信息
-- PIL，用于处理用户上传的聊天图片，进行大小的修改
+- struct:pickle用于服务器和客户端的数据传输处理
+- json：用于处理历史消息的文件存储
+- os：主要用于对文件的一些处理和查询
+- re：正则从文字中得到一些信息
+- PIL：用于处理用户上传的聊天图片，进行大小的修改
 
 ## 基本模式
 

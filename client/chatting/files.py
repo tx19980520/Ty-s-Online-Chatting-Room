@@ -11,7 +11,7 @@ from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 HOST = '127.0.0.1'
-PORT = 23333
+PORT = 23334
 BUFSIZE = 2048
 ADDR=(HOST,PORT)
 class FilePip(QtCore.QThread,tcpCliSock):
@@ -30,9 +30,11 @@ class FilePip(QtCore.QThread,tcpCliSock):
             command = 5
             command = struct.pack('i',command)
             self.send(command)
+            print("command!!!")
             simpleinfo = {'username':self.username,'filename':self.filename,'size':self.size}
             simpleinfo = self.packagesHandle(simpleinfo)
             self.send(simpleinfo)
+            print("simpleinfo")
             f = open(self.path,'rb')
             t=True
             while t:
@@ -45,7 +47,8 @@ class FilePip(QtCore.QThread,tcpCliSock):
                 dicts = pickle.dumps(dicts)
                 l = struct.pack('i',len(dicts))
                 self.send(l+dicts)
-                sleep(0.1)
+                sleep(0.07)
+                print("here")
             f.close()
             self.uploadcomplete.emit(self.filename)
             self.quit()

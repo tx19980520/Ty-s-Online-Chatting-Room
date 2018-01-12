@@ -18,6 +18,7 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
     invisiend = QtCore.pyqtSignal()
     hide = QtCore.pyqtSignal()
     show = QtCore.pyqtSignal()
+    blingbling = QtCore.pyqtSignal()
     def __init__(self,username,state):
         super(Qtray,self).__init__()
         self.mainshow =True#记录现在窗口的情况
@@ -75,6 +76,8 @@ class Qtray(QtCore.QObject):#我没有直接把这个托盘化模块放在window
     def hasMessage(self):#有消息的时候如果是最小的化的情况，需要改变icon
         if not self.mainshow:
             self.tray.setIcon(self.hasmessage)
+        else:
+            self.blingbling.emit()
 
 
 class Downloadbutton(QtWidgets.QPushButton):
@@ -106,6 +109,7 @@ class Chattingfrontend(QtCore.QObject):
         self.username = ''
         self.tr = Qtray(username,state)
         self.tr.tray.show()
+        self.tr.blingbling.connect(self.window.activateWindow)
         #gui信号连接
         self.gui = Ui_Chat(window)
         self.gui.messages.textChanged.connect(self.moveCursor)
@@ -182,7 +186,7 @@ class Chattingfrontend(QtCore.QObject):
         #info['username']+" has quited the chattingroom,bye!"
         if dicts['sender'] == "administor":#一下是管理员消息的处理
             tmp = dicts['message'].split(" ")
-            if "entered" in tmp and (self.username not in tmp ) and (tmp[0] not in self.nowpeople):
+            if "entered" in tmp and (tmp[0] not in self.nowpeople):
                 self.nowpeople.append(tmp[0])
                 row_count = self.gui.users.rowCount()
                 self.now += 1
@@ -192,7 +196,7 @@ class Chattingfrontend(QtCore.QObject):
                 add =QtWidgets.QTableWidgetItem(tmp[0])
                 add.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.gui.users.setItem(row_count,0,add)
-            elif "quited" in tmp and (self.username not in tmp )and (tmp[0] in self.nowpeople):#用户退出，去掉其在用户列表中的那一行
+            elif "quited" in tmp and (tmp[0] in self.nowpeople):#用户退出，去掉其在用户列表中的那一行
                 row_count = self.gui.users.rowCount()#有人退出
                 for i in range(row_count+1):
                     if self.gui.users.item(i,0).text() == tmp[0]:
@@ -230,6 +234,7 @@ class Chattingfrontend(QtCore.QObject):
         elif "@image:" in dicts['message']:#需要下载图片
             filename = "./message/image/"+dicts['message'][7:]
             filename = self.changeHtml(filename)
+            line1 = self.normalMessage(line1)
             self.gui.messages.append(line1)
             self.gui.messages.insertHtml(filename)
             return
